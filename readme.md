@@ -10,4 +10,5 @@ Periodo: Septiembre - Diciembre 2026
 
 |No.| Nombre | Descripcion | Potenciador | Estatus |
 |---|---|---|---|---|
-|1.|
+|1.|Metodologia de Evaluacion de la Materia| Transcribir en libreta y comprender la
+metodologia y fechas de evaluacion de la asignatura| 5|🟢 Concluida
