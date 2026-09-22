@@ -3,6 +3,7 @@ CREATE USER IF NOT EXISTS 'marco.ramirez'@'%' IDENTIFIED BY 'qwerty123';
 CREATE USER IF NOT EXISTS 'obed.vargas'@'%' IDENTIFIED BY '240145';
 CREATE USER IF NOT EXISTS 'osmar.ortega'@'%' IDENTIFIED BY '240036';
 CREATE USER IF NOT EXISTS 'jorge.lopez'@'%' IDENTIFIED BY '240456';
+CREATE USER IF NOT EXISTS 'mago'@'%' IDENTIFIED BY '240242';
 
 /* Asignar los privilegios de super usuario */
 GRANT ALL PRIVILEGES ON *.* TO 'osmar.ortega'@'%';
@@ -42,13 +43,16 @@ grant 'superadmin' TO 'osmar.ortega'@'%';
 GRANT 'admin' TO 'marco.ramirez'@'%';
 GRANT 'support' TO 'obed.vargas'@'%';
 GRANT 'seller' TO 'jorge.lopez'@'%';
+GRANT 'seller' TO 'mago'@'%';
 
 /* ACTIVAR ROLES POR DEFECTO */
 SET DEFAULT ROLE 'superadmin' TO 'osmar.ortega'@'%';
 SET DEFAULT ROLE 'admin' TO 'marco.ramirez'@'%';
 SET DEFAULT ROLE 'support' TO 'obed.vargas'@'%';
 SET DEFAULT ROLE 'seller' TO 'jorge.lopez'@'%';
-
+SET DEFAULT ROLE 'seller' TO 'mago'@'%';
+/*Mostrar los usuarios creados*/
+SELECT "Los usuarios han sifo creados correctamente, se muestran a continuacion: " AS mensaje;
 /* Aplicar cambios */
 FLUSH PRIVILEGES;
 
