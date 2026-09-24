@@ -49,7 +49,7 @@ LEFT JOIN mysql.role_edges re
     ON re.TO_USER = SUBSTRING_INDEX(b.db_user, '@', 1)
 
 WHERE b.table_operation = 'Create'
-  AND b.table_name = 'tb_users'
+  AND b.table_name = 'db_users'
 
 GROUP BY
     u.nick,
@@ -93,3 +93,5 @@ GROUP BY
     b.table_description,
     b.operation_date
 ORDER BY b.operation_date ASC;
+/* Consulta para saber la trazabilidad de los productos */
+SELECT * FROM vw_trazabilidad_productos LIMIT 10;

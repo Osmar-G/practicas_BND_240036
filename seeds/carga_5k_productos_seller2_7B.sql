@@ -1,0 +1,2 @@
+LOAD DATA LOCAL INFILE
+INTO TABLE tb_products
