@@ -94,4 +94,13 @@ GROUP BY
     b.operation_date
 ORDER BY b.operation_date ASC;
 /* Consulta para saber la trazabilidad de los productos */
-SELECT * FROM vw_trazabilidad_productos LIMIT 10;
+SELECT * FROM vw_trazabilidad_productos  ORDER BY operation_date ASC;
+SELECT *FROM vw_trazabilidad_usuarios ORDER BY operation_date ASC;
+
+SELECT 
+    COUNT(*) AS total_productos,
+    db_users AS inserted_by
+FROM db_test_7b.tb_logs
+WHERE table_name = 'tb_products' 
+  AND table_operation = 'Create'
+GROUP BY db_users;
