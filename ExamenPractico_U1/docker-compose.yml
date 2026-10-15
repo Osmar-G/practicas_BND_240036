@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  postgres_osmar:
+    image: postgres:15-alpine
+    container_name: postgres_osmar_ortega
+    restart: always
+    environment:
+      POSTGRES_USER: osmar.ortega
+      POSTGRES_PASSWORD: "240036"
+      POSTGRES_DB: osmar_db
+    ports:
+      - "40036:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  mysql_osmar:
+    image: mysql:8.0
+    container_name: mysql_osmar_ortega
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: osmar_root_password
+      MYSQL_DATABASE: osmar_db
+      MYSQL_USER: osmar.ortega
+      MYSQL_PASSWORD: "240036"
+    ports:
+      - "40037:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin_osmar
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: osmar.ortega@proyectos-integradores-7b-itiid.tech
+      PGADMIN_DEFAULT_PASSWORD: "240036"
+    ports:
+      - "80:80"
+
+volumes:
+  postgres_data:
+  mysql_data:
