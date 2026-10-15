@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0c111c">
+<title>Schema Atlas · Explorador EER</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="topbar"><a class="brand" href="#"><span class="brand-icon">◈</span><span>schema<span class="brand-light">atlas</span><small>MYSQL · EER EXPLORER</small></span></a><div class="top-meta"><span class="live-dot"></span><span id="sourceLabel">Preparando esquema…</span><button id="uploadBtn" class="icon-button" title="Cargar respaldo SQL">↑ <span>Cargar SQL</span></button><input id="fileInput" type="file" accept=".sql,text/sql" hidden></div></header>
+<main>
+<section class="overview"><div><div class="eyebrow">MAPA DE ARQUITECTURA · <span id="dbName">—</span></div><h1>Explora tu <span>modelo de datos.</span></h1><p class="lede">Cada entidad, columna y relación del respaldo. Selecciona un elemento para inspeccionar su definición.</p></div><div class="stats" id="stats"></div></section>
+<section class="workspace">
+<aside class="leftbar"><div class="side-title">EXPLORADOR <span id="tableCount">0</span></div><label class="searchbox"><span>⌕</span><input id="search" placeholder="Buscar tablas o columnas…"><kbd>⌘ K</kbd></label><div class="filters"><select id="filter"><option value="all">Todas las entidades</option><option value="related">Con relaciones</option><option value="isolated">Sin relaciones explícitas</option><option value="empty">Sin filas en respaldo</option><option value="junction">Tablas de asociación</option></select></div><div id="tableList" class="table-list"></div><div class="legend"><div class="side-title">LEYENDA</div><p><i class="key pk">P</i> Clave primaria</p><p><i class="key fk">F</i> Clave foránea</p><p><i class="line-key"></i> Relación confirmada</p><p class="muted">El conteo corresponde a filas INSERT del respaldo.</p></div></aside>
+<section class="diagram-area"><div class="diagram-toolbar"><div class="crumb"><span class="crumb-icon">⌘</span><span id="diagramTitle">db_test_7b</span><span class="crumb-sep">/</span><span class="muted">Diagrama EER</span></div><div class="toolbar-actions"><button id="fitBtn" title="Ajustar al lienzo">⛶ <span>Ajustar</span></button><button id="zoomOut" title="Alejar">−</button><span id="zoomLabel">100%</span><button id="zoomIn" title="Acercar">+</button><button id="exportBtn" title="Exportar diagrama SVG">⇩ <span>SVG</span></button><button id="reportBtn" title="Descargar inventario CSV">▤ <span>CSV</span></button><button id="fullBtn" title="Pantalla completa">⛶</button></div></div><div class="canvas-viewport" id="viewport"><div class="canvas-world" id="world"><svg id="edges" class="edges"></svg><div id="nodes"></div></div><div id="emptyState" class="empty-state" hidden><div>◈</div><strong>Diagrama vacío</strong><span>Ajusta la búsqueda o los filtros para ver entidades.</span></div></div><div class="canvas-foot"><span><i class="dot-green"></i><span id="analysisStatus">Analizando esquema localmente</span></span><span>Arrastra entidades · rueda para zoom · arrastra el fondo para moverte</span></div></section>
+<aside class="inspector" id="inspector"><div class="inspector-empty"><div class="inspect-glyph">⌑</div><strong>Inspecciona el esquema</strong><p>Selecciona una tabla o una columna en el diagrama para ver su definición.</p></div></aside>
+</section>
+<footer><span>SCHEMA ATLAS <span class="muted">· ANALIZADOR LOCAL · NO EJECUTA SQL</span></span><span id="countDisclaimer">Conteos del respaldo, no conteos actuales de una base conectada.</span></footer>
+</main><script src="parser.js"></script><script src="app.js"></script>
+</body></html>
