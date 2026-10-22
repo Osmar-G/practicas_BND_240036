@@ -4,6 +4,9 @@ CREATE USER IF NOT EXISTS 'obed.vargas'@'%' IDENTIFIED BY '240145';
 CREATE USER IF NOT EXISTS 'osmar.ortega'@'%' IDENTIFIED BY '240036';
 CREATE USER IF NOT EXISTS 'jorge.lopez'@'%' IDENTIFIED BY '240456';
 CREATE USER IF NOT EXISTS 'mago.rojas'@'%' IDENTIFIED BY '240242';
+/*Usuarios MiddleWare*/
+CREATE USER IF NOT EXISTS 'app_web'@'%' IDENTIFIED BY 'Web123';
+CREATE USER IF NOT EXISTS 'app_mobile'@'%' IDENTIFIED BY 'Mobile123';
 
 SET GLOBAL local_infile = 1;
 GRANT FILE ON *.* TO 'obed.vargas'@'%';
@@ -45,6 +48,21 @@ TO 'support';
 GRANT SELECT, INSERT, UPDATE
 ON db_test_7b.tb_products
 TO 'seller';
+/* Buyer */
+
+
+
+/*Usuario no Registrado*/
+GRANT INSERT
+ON db_test_7b.db_users
+TO 'user_not_registered';
+
+GRANT INSERT 
+ON db_test_7b.tb_people
+TO 'user_not_registered';
+
+GRANT EXECUTE ON PROCEDURE db_test_7b.sp_register_new_user
+TO 'user_not_registered';
 
 /* ASIGNAR ROLES A LOS USUARIOS CREADOS */
 GRANT 'superadmin' TO 'osmar.ortega'@'%';
@@ -53,12 +71,18 @@ GRANT 'support' TO 'obed.vargas'@'%';
 GRANT 'seller' TO 'jorge.lopez'@'%';
 GRANT 'seller' TO 'mago.rojas'@'%';
 
+/* ASIGNAR ROLES A LOS USUARIOS MIDDLEWARE */
+GRANT 'user_not_registered' TO 'app_web'@'%';
+GRANT 'user_not_registered' TO 'app_mobile'@'%';
+
 /* ACTIVAR ROLES POR DEFECTO */
 SET DEFAULT ROLE 'superadmin' TO 'osmar.ortega'@'%';
 SET DEFAULT ROLE 'admin' TO 'marco.ramirez'@'%';
 SET DEFAULT ROLE 'support' TO 'obed.vargas'@'%';
 SET DEFAULT ROLE 'seller' TO 'jorge.lopez'@'%';
 SET DEFAULT ROLE 'seller' TO 'mago.rojas'@'%';
+SET DEFAULT ROLE 'user_not_registered' TO 'app_web'@'%';
+SET DEFAULT ROLE 'user_not_registered' TO 'app_mobile'@'%';
 
 /* Mostrar los usuarios creados */
 SELECT 'Los usuarios han sido creados correctamente, se muestran a continuacion:' AS mensaje;

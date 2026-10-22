@@ -1157,6 +1157,238 @@ DELIMITER ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
 
+DELIMITER ;;
+CREATE TRIGGER `trg_buyer_orders_after_insert` AFTER INSERT ON `tb_buyer_orders` FOR EACH ROW BEGIN
+    INSERT INTO `tb_logs`
+        (`table_name`, `table_operation`, `db_user`, `record_id`,
+         `operation_date`, `table_description`, `operation_status`)
+    VALUES
+        ('tb_buyer_orders', 'Create', USER(), NEW.ID, NOW(),
+         CONCAT('Pedido creado. ID=', NEW.ID,
+                ', seller_ID=', NEW.seller_ID,
+                ', subtotal=', NEW.subtotal,
+                ', shipping_cost=', NEW.shipping_cost,
+                ', fulfillment_status=', NEW.fulfillment_status,
+                ', status=', IF(NEW.status = b'1', 'Activo', 'Inactivo'),
+                ', creation_date=', NEW.creation_date),
+         b'1');
+END;;
+
+CREATE TRIGGER `trg_buyer_orders_after_update` AFTER UPDATE ON `tb_buyer_orders` FOR EACH ROW BEGIN
+    INSERT INTO `tb_logs`
+        (`table_name`, `table_operation`, `db_user`, `record_id`,
+         `operation_date`, `table_description`, `operation_status`)
+    VALUES
+        ('tb_buyer_orders', 'Update', USER(), NEW.ID, NOW(),
+         CONCAT('Pedido actualizado. ID=', NEW.ID,
+                ', seller_ID: ', OLD.seller_ID, ' -> ', NEW.seller_ID,
+                ', subtotal: ', OLD.subtotal, ' -> ', NEW.subtotal,
+                ', shipping_cost: ', OLD.shipping_cost, ' -> ', NEW.shipping_cost,
+                ', fulfillment_status: ', OLD.fulfillment_status, ' -> ', NEW.fulfillment_status,
+                ', status: ', IF(OLD.status = b'1', 'Activo', 'Inactivo'),
+                ' -> ', IF(NEW.status = b'1', 'Activo', 'Inactivo')),
+         b'1');
+END;;
+
+CREATE TRIGGER `trg_buyer_orders_after_delete` AFTER DELETE ON `tb_buyer_orders` FOR EACH ROW BEGIN
+    INSERT INTO `tb_logs`
+        (`table_name`, `table_operation`, `db_user`, `record_id`,
+         `operation_date`, `table_description`, `operation_status`)
+    VALUES
+        ('tb_buyer_orders', 'Delete', USER(), OLD.ID, NOW(),
+         CONCAT('Pedido eliminado. ID=', OLD.ID,
+                ', seller_ID=', OLD.seller_ID,
+                ', subtotal=', OLD.subtotal,
+                ', shipping_cost=', OLD.shipping_cost,
+                ', fulfillment_status=', OLD.fulfillment_status,
+                ', status=', IF(OLD.status = b'1', 'Activo', 'Inactivo')),
+         b'1');
+END;;
+
+CREATE TRIGGER `trg_payment_methods_types_after_insert` AFTER INSERT ON `tbc_payment_methods_types` FOR EACH ROW BEGIN
+    INSERT INTO `tb_logs`
+        (`table_name`, `table_operation`, `db_user`, `record_id`,
+         `operation_date`, `table_description`, `operation_status`)
+    VALUES
+        ('tbc_payment_methods_types', 'Create', USER(), NEW.ID, NOW(),
+         CONCAT('Tipo de método de pago creado. ID=', NEW.ID,
+                ', code=', NEW.code,
+                ', description=', NEW.description,
+                ', status=', IF(NEW.status = b'1', 'Activo', 'Inactivo')),
+         b'1');
+END;;
+
+CREATE TRIGGER `trg_payment_methods_types_after_update` AFTER UPDATE ON `tbc_payment_methods_types` FOR EACH ROW BEGIN
+    INSERT INTO `tb_logs`
+        (`table_name`, `table_operation`, `db_user`, `record_id`,
+         `operation_date`, `table_description`, `operation_status`)
+    VALUES
+        ('tbc_payment_methods_types', 'Update', USER(), NEW.ID, NOW(),
+         CONCAT('Tipo de método de pago actualizado. ID=', NEW.ID,
+                ', code: ', OLD.code, ' -> ', NEW.code,
+                ', description: ', OLD.description, ' -> ', NEW.description,
+                ', status: ', IF(OLD.status = b'1', 'Activo', 'Inactivo'),
+                ' -> ', IF(NEW.status = b'1', 'Activo', 'Inactivo')),
+         b'1');
+END;;
+
+CREATE TRIGGER `trg_payment_methods_types_after_delete` AFTER DELETE ON `tbc_payment_methods_types` FOR EACH ROW BEGIN
+    INSERT INTO `tb_logs`
+        (`table_name`, `table_operation`, `db_user`, `record_id`,
+         `operation_date`, `table_description`, `operation_status`)
+    VALUES
+        ('tbc_payment_methods_types', 'Delete', USER(), OLD.ID, NOW(),
+         CONCAT('Tipo de método de pago eliminado. ID=', OLD.ID,
+                ', code=', OLD.code,
+                ', description=', OLD.description,
+                ', status=', IF(OLD.status = b'1', 'Activo', 'Inactivo')),
+         b'1');
+END;;
+
+CREATE TRIGGER `trg_carts_items_after_insert` AFTER INSERT ON `tbd_carts_items` FOR EACH ROW BEGIN
+    INSERT INTO `tb_logs`
+        (`table_name`, `table_operation`, `db_user`, `record_id`,
+         `operation_date`, `table_description`, `operation_status`)
+    VALUES
+        ('tbd_carts_items', 'Create', USER(), NEW.product_ID, NOW(),
+         CONCAT('Producto agregado al carrito. cart_ID=', NEW.cart_ID,
+                ', provider_ID=', NEW.provider_ID,
+                ', product_ID=', NEW.product_ID,
+                ', quantity=', NEW.quantity,
+                ', creation_date=', NEW.creation_date),
+         b'1');
+END;;
+
+CREATE TRIGGER `trg_carts_items_after_update` AFTER UPDATE ON `tbd_carts_items` FOR EACH ROW BEGIN
+    INSERT INTO `tb_logs`
+        (`table_name`, `table_operation`, `db_user`, `record_id`,
+         `operation_date`, `table_description`, `operation_status`)
+    VALUES
+        ('tbd_carts_items', 'Update', USER(), NEW.product_ID, NOW(),
+         CONCAT('Producto del carrito actualizado. Clave anterior (cart_ID, provider_ID, product_ID)=(',
+                OLD.cart_ID, ', ', OLD.provider_ID, ', ', OLD.product_ID, '), clave nueva=(',
+                NEW.cart_ID, ', ', NEW.provider_ID, ', ', NEW.product_ID,
+                '), quantity: ', OLD.quantity, ' -> ', NEW.quantity),
+         b'1');
+END;;
+
+CREATE TRIGGER `trg_carts_items_after_delete` AFTER DELETE ON `tbd_carts_items` FOR EACH ROW BEGIN
+    INSERT INTO `tb_logs`
+        (`table_name`, `table_operation`, `db_user`, `record_id`,
+         `operation_date`, `table_description`, `operation_status`)
+    VALUES
+        ('tbd_carts_items', 'Delete', USER(), OLD.product_ID, NOW(),
+         CONCAT('Producto eliminado del carrito. cart_ID=', OLD.cart_ID,
+                ', provider_ID=', OLD.provider_ID,
+                ', product_ID=', OLD.product_ID,
+                ', quantity=', OLD.quantity),
+         b'1');
+END;;
+
+CREATE TRIGGER `trg_order_items_after_insert` AFTER INSERT ON `tbd_order_items` FOR EACH ROW BEGIN
+    INSERT INTO `tb_logs`
+        (`table_name`, `table_operation`, `db_user`, `record_id`,
+         `operation_date`, `table_description`, `operation_status`)
+    VALUES
+        ('tbd_order_items', 'Create', USER(), NEW.ID, NOW(),
+         CONCAT('Artículo de pedido creado. ID=', NEW.ID,
+                ', seller_order_ID=', NEW.seller_order_ID,
+                ', product_ID=', NEW.product_ID,
+                ', provider_ID=', NEW.provider_ID,
+                ', product_name=', NEW.product_name,
+                ', quantity=', NEW.quantity,
+                ', unit_price=', NEW.unit_price,
+                ', subtotal=', NEW.subtotal),
+         b'1');
+END;;
+
+CREATE TRIGGER `trg_order_items_after_update` AFTER UPDATE ON `tbd_order_items` FOR EACH ROW BEGIN
+    INSERT INTO `tb_logs`
+        (`table_name`, `table_operation`, `db_user`, `record_id`,
+         `operation_date`, `table_description`, `operation_status`)
+    VALUES
+        ('tbd_order_items', 'Update', USER(), NEW.ID, NOW(),
+         CONCAT('Artículo de pedido actualizado. ID=', NEW.ID,
+                ', seller_order_ID: ', OLD.seller_order_ID, ' -> ', NEW.seller_order_ID,
+                ', product_ID: ', OLD.product_ID, ' -> ', NEW.product_ID,
+                ', provider_ID: ', OLD.provider_ID, ' -> ', NEW.provider_ID,
+                ', product_name: ', OLD.product_name, ' -> ', NEW.product_name,
+                ', quantity: ', OLD.quantity, ' -> ', NEW.quantity,
+                ', unit_price: ', OLD.unit_price, ' -> ', NEW.unit_price,
+                ', subtotal: ', OLD.subtotal, ' -> ', NEW.subtotal),
+         b'1');
+END;;
+
+CREATE TRIGGER `trg_order_items_after_delete` AFTER DELETE ON `tbd_order_items` FOR EACH ROW BEGIN
+    INSERT INTO `tb_logs`
+        (`table_name`, `table_operation`, `db_user`, `record_id`,
+         `operation_date`, `table_description`, `operation_status`)
+    VALUES
+        ('tbd_order_items', 'Delete', USER(), OLD.ID, NOW(),
+         CONCAT('Artículo de pedido eliminado. ID=', OLD.ID,
+                ', seller_order_ID=', OLD.seller_order_ID,
+                ', product_ID=', OLD.product_ID,
+                ', provider_ID=', OLD.provider_ID,
+                ', product_name=', OLD.product_name,
+                ', quantity=', OLD.quantity,
+                ', unit_price=', OLD.unit_price,
+                ', subtotal=', OLD.subtotal),
+         b'1');
+END;;
+
+CREATE TRIGGER `trg_user_payment_methods_after_insert` AFTER INSERT ON `tbd_user_payment_methods` FOR EACH ROW BEGIN
+    INSERT INTO `tb_logs`
+        (`table_name`, `table_operation`, `db_user`, `record_id`,
+         `operation_date`, `table_description`, `operation_status`)
+    VALUES
+        ('tbd_user_payment_methods', 'Create', USER(), NULL, NOW(),
+         CONCAT('Método de pago de usuario creado. ID=', NEW.ID,
+                ', user_ID=', NEW.user_ID,
+                ', payment_method_type_ID=', NEW.payment_method_type_ID,
+                ', provider=', NEW.provider,
+                ', label=', COALESCE(NEW.label, 'NULL'),
+                ', last_four=', COALESCE(NEW.last_four, 'NULL'),
+                ', is_default=', NEW.is_default,
+                ', status=', IF(NEW.status = b'1', 'Activo', 'Inactivo')),
+         b'1');
+END;;
+
+CREATE TRIGGER `trg_user_payment_methods_after_update` AFTER UPDATE ON `tbd_user_payment_methods` FOR EACH ROW BEGIN
+    INSERT INTO `tb_logs`
+        (`table_name`, `table_operation`, `db_user`, `record_id`,
+         `operation_date`, `table_description`, `operation_status`)
+    VALUES
+        ('tbd_user_payment_methods', 'Update', USER(), NULL, NOW(),
+         CONCAT('Método de pago de usuario actualizado. ID=', NEW.ID,
+                ', user_ID: ', OLD.user_ID, ' -> ', NEW.user_ID,
+                ', payment_method_type_ID: ', OLD.payment_method_type_ID, ' -> ', NEW.payment_method_type_ID,
+                ', provider: ', OLD.provider, ' -> ', NEW.provider,
+                ', label: ', COALESCE(OLD.label, 'NULL'), ' -> ', COALESCE(NEW.label, 'NULL'),
+                ', last_four: ', COALESCE(OLD.last_four, 'NULL'), ' -> ', COALESCE(NEW.last_four, 'NULL'),
+                ', is_default: ', OLD.is_default, ' -> ', NEW.is_default,
+                ', status: ', IF(OLD.status = b'1', 'Activo', 'Inactivo'),
+                ' -> ', IF(NEW.status = b'1', 'Activo', 'Inactivo')),
+         b'1');
+END;;
+
+CREATE TRIGGER `trg_user_payment_methods_after_delete` AFTER DELETE ON `tbd_user_payment_methods` FOR EACH ROW BEGIN
+    INSERT INTO `tb_logs`
+        (`table_name`, `table_operation`, `db_user`, `record_id`,
+         `operation_date`, `table_description`, `operation_status`)
+    VALUES
+        ('tbd_user_payment_methods', 'Delete', USER(), NULL, NOW(),
+         CONCAT('Método de pago de usuario eliminado. ID=', OLD.ID,
+                ', user_ID=', OLD.user_ID,
+                ', payment_method_type_ID=', OLD.payment_method_type_ID,
+                ', provider=', OLD.provider,
+                ', label=', COALESCE(OLD.label, 'NULL'),
+                ', last_four=', COALESCE(OLD.last_four, 'NULL'),
+                ', is_default=', OLD.is_default,
+                ', status=', IF(OLD.status = b'1', 'Activo', 'Inactivo')),
+         b'1');
+END;;
+DELIMITER ;
+
 --
 -- Temporary view structure for view `vw_trazabilidad_carritos`
 --
