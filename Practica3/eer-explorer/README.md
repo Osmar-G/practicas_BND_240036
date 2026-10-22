@@ -1,23 +1,29 @@
-# Schema Atlas · Explorador EER
+# Diccionario de datos · Schema Atlas
 
-Visor local del esquema MySQL contenido en `../backups/9Respaldo.sql`. El analizador interpreta el DDL y las tuplas de `INSERT` directamente en el navegador. No abre conexiones de base de datos ni ejecuta instrucciones SQL.
+Aplicación local en español que analiza `../backups/10Respaldo.sql` como texto. No conecta con MySQL y nunca ejecuta sentencias del archivo. El respaldo se carga automáticamente al iniciar el servidor; también se puede seleccionar otro `.sql` en la interfaz.
 
 ## Uso
 
-Requiere Node.js 18 o posterior; no necesita instalar dependencias.
+Requiere Node.js 18 o posterior. No necesita instalar dependencias.
 
 ```sh
 node server.cjs
 ```
 
-Abre <http://127.0.0.1:4173/eer-explorer/>. También puedes elegir otro respaldo con **Cargar SQL**. Para comprobar el archivo inicial desde la terminal:
+Abre <http://127.0.0.1:4173/eer-explorer/>. Para analizar y contar los objetos del respaldo desde la terminal:
 
 ```sh
 node verify.cjs
 ```
 
-Los números mostrados son filas insertadas en el respaldo. No representan conteos actuales: el visor no tiene una conexión a MySQL. El panel permite inspeccionar columnas, claves, índices, relaciones y DDL. Arrastra las tarjetas o el fondo, usa la rueda para zoom y exporta el diagrama en SVG. La distribución se conserva en el almacenamiento local del navegador.
+Las filas que aparecen en el catálogo son tuplas de sentencias `INSERT` incluidas en el respaldo; no son un conteo actual de una base de datos conectada. La documentación inferida a partir de nombres se etiqueta como pendiente de confirmación. No se exhiben valores de los INSERT.
 
-## Alcance del analizador
+## Funciones
 
-El parser recorre strings, identificadores entre backticks, comentarios SQL y paréntesis anidados para separar las definiciones. Interpreta tablas, columnas, claves primarias y foráneas, índices, checks, vistas, triggers, rutinas y filas presentes en sentencias `INSERT`. Los objetos no compatibles y referencias no resueltas se informan como advertencias. No infiere relaciones por similitud de nombres. Los conteos del respaldo son cantidades de tuplas incluidas en `INSERT`, no una reconstrucción de cambios posteriores ni un conteo vivo.
+- Catálogo de tablas, columnas, claves, índices, relaciones declaradas y objetos SQL.
+- Búsqueda global y filtros por tabla, tipo, nulabilidad y restricciones.
+- Glosario generado para los tipos encontrados.
+- Exportación de columnas a CSV, libro Excel `.xlsx` con siete hojas, HTML imprimible y PDF mediante el diálogo de impresión del navegador.
+- El parser procesa comentarios, cadenas, identificadores entre acentos graves, paréntesis y restricciones declaradas en la tabla. Las advertencias se muestran en la validación.
+
+El análisis es conservador: las relaciones se confirman solo si están declaradas por claves foráneas. El significado funcional que no pueda respaldarse con comentarios o restricciones se marca para confirmar.
