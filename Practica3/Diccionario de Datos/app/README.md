@@ -21,3 +21,7 @@ Abre <http://127.0.0.1:4173>. Para cambiar el puerto, define la variable `PORT` 
 - El PDF se genera desde la opción de impresión del navegador (Guardar como PDF). CSV y XLSX contienen inventario de columnas; el libro XLSX añade una hoja de relaciones. JSON, Markdown y HTML pueden guardarse directamente.
 
 La aplicación no tiene dependencias npm ni requiere instalación de paquetes.
+
+## Modelo entidad-relación
+
+Desde el encabezado del diccionario, abre **Modelo ER** para explorar el diagrama interactivo. El mismo servidor y analizador alimentan la vista; también puedes cargar un respaldo desde esa pantalla. Las posiciones se guardan en el almacenamiento local del navegador. El generador `generate-archify-erd.js` reconstruye el candidato ER de Archify desde el mismo respaldo.

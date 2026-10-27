@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "ok": false,
+  "command": "finalize",
+  "status": "fail",
+  "type": "erd",
+  "quality": "standard",
+  "specification": {
+    "path": "C:\\Users\\osmar\\OneDrive\\Documentos\\practicas_BND_240036\\.archify\\erd-db-test-7b-20261026-2241\\candidate.erd.json",
+    "sha256": "a1889821be2e9eb2771653fe8c50bd0080d5e2ffd275e94aab3ba9dc368acd01",
+    "bytes": 21585
+  },
+  "artifact": {
+    "path": "C:\\Users\\osmar\\OneDrive\\Documentos\\practicas_BND_240036\\.archify\\erd-db-test-7b-20261026-2241\\erd-db-test-7b.html",
+    "sha256": "ae00f97eb955be71cbf5d7c2b44900e9055488465b772713eb113c2480ae1b21",
+    "bytes": 911780
+  },
+  "gates": {
+    "validate": "fail",
+    "deliver": "not-run",
+    "check": "not-run",
+    "browser-check": "not-run"
+  },
+  "failedStage": "validate",
+  "diagnostics": [
+    {
+      "code": "delivery/provenance-recovery-required",
+      "severity": "error",
+      "message": "Failed-delivery provenance could not be rolled back safely.",
+      "subject": {
+        "output": "C:\\Users\\osmar\\OneDrive\\Documentos\\practicas_BND_240036\\.archify\\erd-db-test-7b-20261026-2241\\erd-db-test-7b.html",
+        "provenance": "C:\\Users\\osmar\\OneDrive\\Documentos\\practicas_BND_240036\\.archify\\erd-db-test-7b-20261026-2241\\erd-db-test-7b.delivery.json"
+      },
+      "evidence": {
+        "reason": "The delivery provenance target identity could not be determined safely.",
+        "recoveryRequired": true,
+        "recoveryDirectory": "\\\\?\\C:\\Users\\osmar\\OneDrive\\Documentos\\practicas_BND_240036\\.archify\\erd-db-test-7b-20261026-2241\\.archify-provenance-tVQK3i",
+        "recoveryFiles": [
+          {
+            "label": "preserved delivery provenance backup entry",
+            "path": "\\\\?\\C:\\Users\\osmar\\OneDrive\\Documentos\\practicas_BND_240036\\.archify\\erd-db-test-7b-20261026-2241\\.archify-provenance-tVQK3i\\.previous-provenance",
+            "target": "C:\\Users\\osmar\\OneDrive\\Documentos\\practicas_BND_240036\\.archify\\erd-db-test-7b-20261026-2241\\erd-db-test-7b.delivery.json",
+            "verifiedPrevious": true
+          }
+        ],
+        "rollbackErrors": [
+          "previous provenance restore failed (EPERM: operation not permitted, link 'C:\\Users\\osmar\\OneDrive\\Documentos\\practicas_BND_240036\\.archify\\erd-db-test-7b-20261026-2241\\.archify-provenance-tVQK3i\\.previous-provenance' -> 'C:\\Users\\osmar\\OneDrive\\Documentos\\practicas_BND_240036\\.archify\\erd-db-test-7b-20261026-2241\\erd-db-test-7b.delivery.json')"
+        ]
+      },
+      "supportedFixes": [
+        "leave the delivery lock and journal untouched, inspect the retained recovery files, then recover serially"
+      ]
+    },
+    {
+      "code": "layout/constraint",
+      "severity": "error",
+      "message": "Relationship 4 id \"rel_5\" \"tbd_address_components\" -> \"tb_user_addresses\" is too short (22px; minimum 24px) — place the entities farther apart.",
+      "subject": {
+        "diagramType": "erd"
+      }
+    }
+  ],
+  "diagnosticSummary": {
+    "total": 2,
+    "shown": 2,
+    "truncated": false
+  },
+  "evidence": {
+    "receipt": "C:\\Users\\osmar\\OneDrive\\Documentos\\practicas_BND_240036\\.archify\\erd-db-test-7b-20261026-2241\\review-2\\erd-db-test-7b.finalize.json",
+    "summaryReceipt": "C:\\Users\\osmar\\OneDrive\\Documentos\\practicas_BND_240036\\.archify\\erd-db-test-7b-20261026-2241\\review-2\\erd-db-test-7b.finalize-summary.json"
+  },
+  "update": {
+    "status": "current",
+    "installedVersion": "3.2.0",
+    "availableVersion": "3.2.0",
+    "releaseNotes": null,
+    "checkedAt": "2026-10-27T04:36:05.005Z",
+    "source": "cache",
+    "noticeRequired": false,
+    "noticeText": null
+  },
+  "visualReview": "not-requested",
+  "durationMs": 1271,
+  "browserCheck": {
+    "requested": true,
+    "ran": false
+  },
+  "nextAction": {
+    "action": "edit-in-place",
+    "candidate": "C:\\Users\\osmar\\OneDrive\\Documentos\\practicas_BND_240036\\.archify\\erd-db-test-7b-20261026-2241\\candidate.erd.json",
+    "constraint": "Preserve unaffected semantics and geometry; apply each diagnostic's supportedFixes, or the fix its message names, and do not replace the whole candidate.",
+    "then": "finalize-once"
+  }
+}

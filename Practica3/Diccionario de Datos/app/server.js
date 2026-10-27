@@ -61,6 +61,8 @@ function parseSQL(sql, filename='12Respaldo.sql') {
  const ddl=[...clean.matchAll(/CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?(`(?:``|[^`])+`|[\w$]+)\s*\(([\s\S]*?)\)\s*(?:ENGINE\s*=|;)/gi)];
  for(const m of ddl){
   const name=unquote(m[1]), body=m[2], table={name,columns:[],indexes:[],foreignKeys:[],checks:[],comment:'',rows:null};
+  const rawTableToken=m[1].replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),rawCreate=new RegExp('CREATE\\s+TABLE\\s+(?:IF\\s+NOT\\s+EXISTS\\s+)?'+rawTableToken+'\\s*\\(','i'),rawStart=sql.search(rawCreate);
+  table.createSql=rawStart>=0?sql.slice(rawStart,statementEnd(sql,rawStart)).trim():clean.slice(m.index,statementEnd(clean,m.index)).trim();
   for(const part of splitTop(body)){
    let x;
    if((x=part.match(/^(?:CONSTRAINT\s+(`[^`]+`|[\w$]+)\s+)?PRIMARY\s+KEY\s*(?:USING\s+\w+\s*)?\(([^)]+)\)/i))){table.primaryKey=splitTop(x[2]).map(v=>unquote(v.replace(/\s+(ASC|DESC)$/i,'')));continue}
@@ -92,7 +94,7 @@ function parseSQL(sql, filename='12Respaldo.sql') {
  for(const m of clean.matchAll(/CREATE\s+(?:OR\s+REPLACE\s+)?VIEW\s+`([^`]+)`/gi)){const end=statementEnd(clean,m.index),definition=clean.slice(m.index,end);const dependencies=[...definition.matchAll(/\b(?:FROM|JOIN)\s+(`[^`]+`|[\w$]+)/gi)].map(x=>unquote(x[1]));const columns=[...definition.matchAll(/\bAS\s+`([^`]+)`/gi)].map(x=>x[1]);objects.views.push({name:m[1],dependencies:[...new Set(dependencies)],columns});}
  for(const m of clean.matchAll(/CREATE\s+(?:PROCEDURE|FUNCTION)\s+`([^`]+)`/gi))objects.routines.push({name:m[1],kind:/CREATE\s+FUNCTION/i.test(m[0])?'Función':'Procedimiento'});
  // Restrict relation output to declared foreign keys.
- const relations=tables.flatMap(t=>t.foreignKeys.map(f=>{const uniqueSource=(t.primaryKey||[]).length===f.columns.length&&f.columns.every(c=>t.primaryKey.includes(c))||t.indexes.some(i=>i.unique&&i.columns.length===f.columns.length&&f.columns.every(c=>i.columns.includes(c)));return {source:t.name,columns:f.columns,target:f.target,targetColumns:f.targetColumns,name:f.name,onDelete:f.onDelete,onUpdate:f.onUpdate,optional:f.columns.some(c=>t.columns.find(x=>x.name===c)?.nullable),cardinality:uniqueSource?'uno a uno desde el origen':'muchos a uno desde el origen'};}));
+ const relations=tables.flatMap(t=>t.foreignKeys.map(f=>{const uniqueSource=(t.primaryKey||[]).length===f.columns.length&&f.columns.every(c=>t.primaryKey.includes(c))||t.indexes.some(i=>i.unique&&i.columns.length===f.columns.length&&f.columns.every(c=>i.columns.includes(c)));const optional=f.columns.some(c=>t.columns.find(x=>x.name===c)?.nullable);return {source:t.name,columns:f.columns,target:f.target,targetColumns:f.targetColumns,name:f.name,onDelete:f.onDelete,onUpdate:f.onUpdate,optional,cardinality:uniqueSource?'uno a uno desde el origen':'muchos a uno desde el origen',fromCardinality:uniqueSource?'one':'many',toCardinality:'one',fromOptional:true,toOptional:optional};}));
  // Mark key roles and indexes on each column.
  for(const t of tables)for(const c of t.columns){c.primary=(t.primaryKey||[]).includes(c.name);c.foreign=relations.filter(r=>r.source===t.name&&r.columns.includes(c.name));c.indexes=t.indexes.filter(x=>x.columns.includes(c.name)).map(x=>x.name);}
  const insertsTotal=tables.reduce((n,t)=>n+(t.rows||0),0);
@@ -111,4 +113,5 @@ const server=http.createServer((req,res)=>{
  if(req.method==='GET'&&fs.existsSync(file)){res.writeHead(200,{'content-type':mime[path.extname(file)]||'application/octet-stream'});fs.createReadStream(file).pipe(res);return}
  res.writeHead(404);res.end('No encontrado');
 });
-server.listen(PORT,'127.0.0.1',()=>console.log(`Diccionario local disponible en http://127.0.0.1:${PORT}`));
+if(require.main===module)server.listen(PORT,'127.0.0.1',()=>console.log(`Diccionario local disponible en http://127.0.0.1:${PORT}`));
+module.exports={parseSQL};
