@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "ok": false,
+  "command": "finalize",
+  "status": "running",
+  "type": "erd",
+  "quality": "standard",
+  "startedAt": "2026-10-27T04:36:41.949Z",
+  "specification": {
+    "path": "C:\\Users\\osmar\\OneDrive\\Documentos\\practicas_BND_240036\\.archify\\erd-db-test-7b-20261026-2234\\candidate.erd.json",
+    "sha256": "13187c506f0e1b0ff569f89f31ee0fbe89c7cbf7f8c7b8584bb5e5e9ecd62ec8",
+    "bytes": 21569
+  },
+  "artifact": {
+    "path": "C:\\Users\\osmar\\OneDrive\\Documentos\\practicas_BND_240036\\.archify\\erd-db-test-7b-20261026-2234\\erd-db-test-7b.html"
+  },
+  "stages": {},
+  "browserCheck": {
+    "requested": true,
+    "ran": false
+  },
+  "diagnostics": [],
+  "evidence": {
+    "receipt": "C:\\Users\\osmar\\OneDrive\\Documentos\\practicas_BND_240036\\.archify\\erd-db-test-7b-20261026-2234\\erd-db-test-7b.finalize.json",
+    "summaryReceipt": "C:\\Users\\osmar\\OneDrive\\Documentos\\practicas_BND_240036\\.archify\\erd-db-test-7b-20261026-2234\\erd-db-test-7b.finalize-summary.json"
+  },
+  "visualReview": "not-requested"
+}

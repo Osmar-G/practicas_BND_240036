@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "command": "deliver",
+  "status": "pending",
+  "receiptId": "30ecd8d1-196e-4a80-aa62-a10012d8293e",
+  "input": "C:\\Users\\osmar\\OneDrive\\Documentos\\practicas_BND_240036\\.archify\\erd-db-test-7b-20261026-2241\\candidate.erd.json",
+  "output": "C:\\Users\\osmar\\OneDrive\\Documentos\\practicas_BND_240036\\.archify\\erd-db-test-7b-20261026-2241\\erd-db-test-7b.html"
+}
