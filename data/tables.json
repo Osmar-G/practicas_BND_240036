@@ -1,0 +1,4219 @@
+[
+  {
+    "name": "db_users",
+    "columns": [
+      {
+        "name": "ID",
+        "type": "int unsigned",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": true,
+        "generated": null,
+        "unique": false,
+        "primary": true,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "email",
+        "type": "varchar(100)",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": true,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "nick",
+        "type": "varchar(50)",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": true,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "password",
+        "type": "varchar(255)",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "creation_date",
+        "type": "datetime",
+        "nullable": false,
+        "default": "CURRENT_TIMESTAMP",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "last_update",
+        "type": "datetime",
+        "nullable": true,
+        "default": "NULL",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "last_login",
+        "type": "datetime",
+        "nullable": true,
+        "default": "NULL",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "status",
+        "type": "bit(1)",
+        "nullable": true,
+        "default": "b'1'",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      }
+    ],
+    "primaryKey": [
+      "ID"
+    ],
+    "primaryKeyDefinition": "PRIMARY KEY (`ID`)",
+    "uniqueKeys": [
+      {
+        "name": "email",
+        "columns": [
+          "email"
+        ],
+        "definition": "UNIQUE KEY `email` (`email`)"
+      },
+      {
+        "name": "nick",
+        "columns": [
+          "nick"
+        ],
+        "definition": "UNIQUE KEY `nick` (`nick`)"
+      }
+    ],
+    "indexes": [],
+    "foreignKeys": [],
+    "checks": [],
+    "engine": "InnoDB"
+  },
+  {
+    "name": "tb_buyer_orders",
+    "columns": [
+      {
+        "name": "ID",
+        "type": "int unsigned",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": true,
+        "generated": null,
+        "unique": false,
+        "primary": true,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "seller_ID",
+        "type": "int unsigned",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": true,
+        "comment": null
+      },
+      {
+        "name": "subtotal",
+        "type": "decimal(12,2)",
+        "nullable": false,
+        "default": "'0.00'",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "shipping_cost",
+        "type": "decimal(12,2)",
+        "nullable": false,
+        "default": "'0.00'",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "fulfillment_status",
+        "type": "enum('Pending','Accepted','Preparing','Sent','Delivered','Canceled','Returned')",
+        "nullable": false,
+        "default": "'Pending'",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "status",
+        "type": "bit(1)",
+        "nullable": false,
+        "default": "b'1'",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "creation_date",
+        "type": "datetime",
+        "nullable": false,
+        "default": "CURRENT_TIMESTAMP",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "last_update",
+        "type": "datetime",
+        "nullable": true,
+        "default": "NULL",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      }
+    ],
+    "primaryKey": [
+      "ID"
+    ],
+    "primaryKeyDefinition": "PRIMARY KEY (`ID`)",
+    "uniqueKeys": [],
+    "indexes": [
+      {
+        "name": "idx_tb_buyer_orders_seller_ID",
+        "columns": [
+          "seller_ID"
+        ],
+        "unique": false,
+        "definition": "KEY `idx_tb_buyer_orders_seller_ID` (`seller_ID`)"
+      }
+    ],
+    "foreignKeys": [
+      {
+        "name": "fk_tb_buyer_orders_db_users",
+        "columns": [
+          "seller_ID"
+        ],
+        "referencesTable": "db_users",
+        "referencesColumns": [
+          "ID"
+        ],
+        "definition": "CONSTRAINT `fk_tb_buyer_orders_db_users` FOREIGN KEY (`seller_ID`) REFERENCES `db_users` (`ID`)",
+        "onDelete": null,
+        "onUpdate": null
+      }
+    ],
+    "checks": [
+      {
+        "name": "chk_tb_buyer_orders_shipping_cost",
+        "expression": "(`shipping_cost` >= 0)",
+        "definition": "CONSTRAINT `chk_tb_buyer_orders_shipping_cost` CHECK ((`shipping_cost` >= 0))"
+      },
+      {
+        "name": "chk_tb_buyer_orders_subtotal",
+        "expression": "(`subtotal` >= 0)",
+        "definition": "CONSTRAINT `chk_tb_buyer_orders_subtotal` CHECK ((`subtotal` >= 0))"
+      }
+    ],
+    "engine": "InnoDB"
+  },
+  {
+    "name": "tb_cancellations",
+    "columns": [
+      {
+        "name": "ID",
+        "type": "int unsigned",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": true,
+        "generated": null,
+        "unique": false,
+        "primary": true,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "buyer_order_ID",
+        "type": "int unsigned",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": true,
+        "comment": null
+      },
+      {
+        "name": "user_ID",
+        "type": "int unsigned",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": true,
+        "comment": null
+      },
+      {
+        "name": "cancellation_reason",
+        "type": "varchar(500)",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "cancellation_status",
+        "type": "enum('Requested','Approved','Rejected','Completed')",
+        "nullable": false,
+        "default": "'Requested'",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "requested_date",
+        "type": "datetime",
+        "nullable": false,
+        "default": "CURRENT_TIMESTAMP",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "resolved_date",
+        "type": "datetime",
+        "nullable": true,
+        "default": "NULL",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "resolution_notes",
+        "type": "text",
+        "nullable": true,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "status",
+        "type": "bit(1)",
+        "nullable": false,
+        "default": "b'1'",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "creation_date",
+        "type": "datetime",
+        "nullable": false,
+        "default": "CURRENT_TIMESTAMP",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "last_update",
+        "type": "datetime",
+        "nullable": true,
+        "default": "NULL",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      }
+    ],
+    "primaryKey": [
+      "ID"
+    ],
+    "primaryKeyDefinition": "PRIMARY KEY (`ID`)",
+    "uniqueKeys": [],
+    "indexes": [
+      {
+        "name": "idx_cancellation_order",
+        "columns": [
+          "buyer_order_ID"
+        ],
+        "unique": false,
+        "definition": "KEY `idx_cancellation_order` (`buyer_order_ID`)"
+      },
+      {
+        "name": "idx_cancellation_user",
+        "columns": [
+          "user_ID"
+        ],
+        "unique": false,
+        "definition": "KEY `idx_cancellation_user` (`user_ID`)"
+      }
+    ],
+    "foreignKeys": [
+      {
+        "name": "fk_cancellations_order",
+        "columns": [
+          "buyer_order_ID"
+        ],
+        "referencesTable": "tb_buyer_orders",
+        "referencesColumns": [
+          "ID"
+        ],
+        "definition": "CONSTRAINT `fk_cancellations_order` FOREIGN KEY (`buyer_order_ID`) REFERENCES `tb_buyer_orders` (`ID`)",
+        "onDelete": null,
+        "onUpdate": null
+      },
+      {
+        "name": "fk_cancellations_user",
+        "columns": [
+          "user_ID"
+        ],
+        "referencesTable": "db_users",
+        "referencesColumns": [
+          "ID"
+        ],
+        "definition": "CONSTRAINT `fk_cancellations_user` FOREIGN KEY (`user_ID`) REFERENCES `db_users` (`ID`)",
+        "onDelete": null,
+        "onUpdate": null
+      }
+    ],
+    "checks": [],
+    "engine": "InnoDB"
+  },
+  {
+    "name": "tb_carts",
+    "columns": [
+      {
+        "name": "ID",
+        "type": "int unsigned",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": true,
+        "generated": null,
+        "unique": false,
+        "primary": true,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "user_ID",
+        "type": "int unsigned",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": true,
+        "primary": false,
+        "foreignKey": true,
+        "comment": null
+      },
+      {
+        "name": "status",
+        "type": "bit(1)",
+        "nullable": false,
+        "default": "b'1'",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "creation_date",
+        "type": "datetime",
+        "nullable": false,
+        "default": "CURRENT_TIMESTAMP",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "last_update",
+        "type": "datetime",
+        "nullable": false,
+        "default": "CURRENT_TIMESTAMP",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      }
+    ],
+    "primaryKey": [
+      "ID"
+    ],
+    "primaryKeyDefinition": "PRIMARY KEY (`ID`)",
+    "uniqueKeys": [
+      {
+        "name": "uk_cart_user",
+        "columns": [
+          "user_ID"
+        ],
+        "definition": "UNIQUE KEY `uk_cart_user` (`user_ID`)"
+      }
+    ],
+    "indexes": [],
+    "foreignKeys": [
+      {
+        "name": "fk_carts_user",
+        "columns": [
+          "user_ID"
+        ],
+        "referencesTable": "db_users",
+        "referencesColumns": [
+          "ID"
+        ],
+        "definition": "CONSTRAINT `fk_carts_user` FOREIGN KEY (`user_ID`) REFERENCES `db_users` (`ID`)",
+        "onDelete": null,
+        "onUpdate": null
+      }
+    ],
+    "checks": [],
+    "engine": "InnoDB"
+  },
+  {
+    "name": "tb_logs",
+    "columns": [
+      {
+        "name": "ID",
+        "type": "int",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": true,
+        "generated": null,
+        "unique": false,
+        "primary": true,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "table_name",
+        "type": "varchar(80)",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "table_operation",
+        "type": "enum('Create','Read','Update','Delete')",
+        "nullable": true,
+        "default": "NULL",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "db_user",
+        "type": "varchar(80)",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "record_id",
+        "type": "int unsigned",
+        "nullable": true,
+        "default": "NULL",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "operation_date",
+        "type": "datetime",
+        "nullable": false,
+        "default": "CURRENT_TIMESTAMP",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "table_description",
+        "type": "text",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "operation_status",
+        "type": "bit(1)",
+        "nullable": true,
+        "default": "b'1'",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      }
+    ],
+    "primaryKey": [
+      "ID"
+    ],
+    "primaryKeyDefinition": "PRIMARY KEY (`ID`)",
+    "uniqueKeys": [],
+    "indexes": [
+      {
+        "name": "idx_logs_trazabilidad",
+        "columns": [
+          "table_name",
+          "table_operation",
+          "record_id",
+          "operation_date"
+        ],
+        "unique": false,
+        "definition": "KEY `idx_logs_trazabilidad` (`table_name`,`table_operation`,`record_id`,`operation_date`)"
+      }
+    ],
+    "foreignKeys": [],
+    "checks": [],
+    "engine": "InnoDB"
+  },
+  {
+    "name": "tb_payment_methods",
+    "columns": [
+      {
+        "name": "ID",
+        "type": "int unsigned",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": true,
+        "generated": null,
+        "unique": false,
+        "primary": true,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "order_ID",
+        "type": "int unsigned",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "user_ID",
+        "type": "int unsigned",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": true,
+        "comment": null
+      },
+      {
+        "name": "payment_method_type_ID",
+        "type": "int unsigned",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": true,
+        "comment": null
+      },
+      {
+        "name": "payment_reference",
+        "type": "varchar(150)",
+        "nullable": true,
+        "default": "NULL",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "amount",
+        "type": "decimal(12,2)",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "currency",
+        "type": "char(3)",
+        "nullable": false,
+        "default": "'MXN'",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "payment_status",
+        "type": "enum('Pending','Authorized','Paid','Failed','Cancelled','Refunded')",
+        "nullable": false,
+        "default": "'Pending'",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "payment_date",
+        "type": "datetime",
+        "nullable": true,
+        "default": "NULL",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "notes",
+        "type": "text",
+        "nullable": true,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "status",
+        "type": "bit(1)",
+        "nullable": false,
+        "default": "b'1'",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "creation_date",
+        "type": "datetime",
+        "nullable": false,
+        "default": "CURRENT_TIMESTAMP",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "last_update",
+        "type": "datetime",
+        "nullable": true,
+        "default": "NULL",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      }
+    ],
+    "primaryKey": [
+      "ID"
+    ],
+    "primaryKeyDefinition": "PRIMARY KEY (`ID`)",
+    "uniqueKeys": [],
+    "indexes": [
+      {
+        "name": "idx_payment_methods_order",
+        "columns": [
+          "order_ID"
+        ],
+        "unique": false,
+        "definition": "KEY `idx_payment_methods_order` (`order_ID`)"
+      },
+      {
+        "name": "idx_payment_methods_user",
+        "columns": [
+          "user_ID"
+        ],
+        "unique": false,
+        "definition": "KEY `idx_payment_methods_user` (`user_ID`)"
+      },
+      {
+        "name": "idx_payment_methods_type",
+        "columns": [
+          "payment_method_type_ID"
+        ],
+        "unique": false,
+        "definition": "KEY `idx_payment_methods_type` (`payment_method_type_ID`)"
+      }
+    ],
+    "foreignKeys": [
+      {
+        "name": "fk_payment_methods_type",
+        "columns": [
+          "payment_method_type_ID"
+        ],
+        "referencesTable": "tbc_payment_methods_types",
+        "referencesColumns": [
+          "ID"
+        ],
+        "definition": "CONSTRAINT `fk_payment_methods_type` FOREIGN KEY (`payment_method_type_ID`) REFERENCES `tbc_payment_methods_types` (`ID`)",
+        "onDelete": null,
+        "onUpdate": null
+      },
+      {
+        "name": "fk_payment_methods_user",
+        "columns": [
+          "user_ID"
+        ],
+        "referencesTable": "db_users",
+        "referencesColumns": [
+          "ID"
+        ],
+        "definition": "CONSTRAINT `fk_payment_methods_user` FOREIGN KEY (`user_ID`) REFERENCES `db_users` (`ID`)",
+        "onDelete": null,
+        "onUpdate": null
+      }
+    ],
+    "checks": [
+      {
+        "name": "chk_payment_methods_amount",
+        "expression": "(`amount` > 0)",
+        "definition": "CONSTRAINT `chk_payment_methods_amount` CHECK ((`amount` > 0))"
+      }
+    ],
+    "engine": "InnoDB"
+  },
+  {
+    "name": "tb_payment_transactions",
+    "columns": [
+      {
+        "name": "ID",
+        "type": "int unsigned",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": true,
+        "generated": null,
+        "unique": false,
+        "primary": true,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "payment_ID",
+        "type": "int unsigned",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": true,
+        "comment": null
+      },
+      {
+        "name": "event_type",
+        "type": "enum('Created','Authorized','Captured','Failed','Refunded','PartiallyRefunded')",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "amount",
+        "type": "decimal(12,2)",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "event_reference",
+        "type": "varchar(150)",
+        "nullable": true,
+        "default": "NULL",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "remarks",
+        "type": "text",
+        "nullable": true,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "creation_date",
+        "type": "datetime",
+        "nullable": false,
+        "default": "CURRENT_TIMESTAMP",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      }
+    ],
+    "primaryKey": [
+      "ID"
+    ],
+    "primaryKeyDefinition": "PRIMARY KEY (`ID`)",
+    "uniqueKeys": [],
+    "indexes": [
+      {
+        "name": "fk_transactions_payments",
+        "columns": [
+          "payment_ID"
+        ],
+        "unique": false,
+        "definition": "KEY `fk_transactions_payments` (`payment_ID`)"
+      }
+    ],
+    "foreignKeys": [
+      {
+        "name": "fk_transactions_payments",
+        "columns": [
+          "payment_ID"
+        ],
+        "referencesTable": "tb_payments",
+        "referencesColumns": [
+          "ID"
+        ],
+        "definition": "CONSTRAINT `fk_transactions_payments` FOREIGN KEY (`payment_ID`) REFERENCES `tb_payments` (`ID`)",
+        "onDelete": null,
+        "onUpdate": null
+      }
+    ],
+    "checks": [
+      {
+        "name": "chk_transaction_amount",
+        "expression": "(`amount` >= 0)",
+        "definition": "CONSTRAINT `chk_transaction_amount` CHECK ((`amount` >= 0))"
+      }
+    ],
+    "engine": "InnoDB"
+  },
+  {
+    "name": "tb_payments",
+    "columns": [
+      {
+        "name": "ID",
+        "type": "int unsigned",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": true,
+        "generated": null,
+        "unique": false,
+        "primary": true,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "order_ID",
+        "type": "int unsigned",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": true,
+        "comment": null
+      },
+      {
+        "name": "amount",
+        "type": "decimal(12,2)",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "currency",
+        "type": "char(3)",
+        "nullable": false,
+        "default": "'MXN'",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "payment_method",
+        "type": "enum('Card','SPEI','Transfer','Cash')",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "provider",
+        "type": "varchar(50)",
+        "nullable": true,
+        "default": "NULL",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "provider_reference",
+        "type": "varchar(150)",
+        "nullable": true,
+        "default": "NULL",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "payment_status",
+        "type": "enum('Pending','Authorized','Paid','Failed','Refunded','PartiallyRefunded')",
+        "nullable": false,
+        "default": "'Pending'",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "creation_date",
+        "type": "datetime",
+        "nullable": false,
+        "default": "CURRENT_TIMESTAMP",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "paid_date",
+        "type": "datetime",
+        "nullable": true,
+        "default": "NULL",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "last_update",
+        "type": "datetime",
+        "nullable": true,
+        "default": "NULL",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      }
+    ],
+    "primaryKey": [
+      "ID"
+    ],
+    "primaryKeyDefinition": "PRIMARY KEY (`ID`)",
+    "uniqueKeys": [
+      {
+        "name": "uk_payment_reference",
+        "columns": [
+          "provider",
+          "provider_reference"
+        ],
+        "definition": "UNIQUE KEY `uk_payment_reference` (`provider`,`provider_reference`)"
+      }
+    ],
+    "indexes": [
+      {
+        "name": "fk_payments_buyer_orders",
+        "columns": [
+          "order_ID"
+        ],
+        "unique": false,
+        "definition": "KEY `fk_payments_buyer_orders` (`order_ID`)"
+      }
+    ],
+    "foreignKeys": [
+      {
+        "name": "fk_payments_buyer_orders",
+        "columns": [
+          "order_ID"
+        ],
+        "referencesTable": "tb_buyer_orders",
+        "referencesColumns": [
+          "ID"
+        ],
+        "definition": "CONSTRAINT `fk_payments_buyer_orders` FOREIGN KEY (`order_ID`) REFERENCES `tb_buyer_orders` (`ID`)",
+        "onDelete": null,
+        "onUpdate": null
+      }
+    ],
+    "checks": [
+      {
+        "name": "chk_payment_amount",
+        "expression": "(`amount` > 0)",
+        "definition": "CONSTRAINT `chk_payment_amount` CHECK ((`amount` > 0))"
+      }
+    ],
+    "engine": "InnoDB"
+  },
+  {
+    "name": "tb_people",
+    "columns": [
+      {
+        "name": "person_ID",
+        "type": "bigint unsigned",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": true,
+        "generated": null,
+        "unique": false,
+        "primary": true,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "user_ID",
+        "type": "int unsigned",
+        "nullable": true,
+        "default": "NULL",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": true,
+        "primary": false,
+        "foreignKey": true,
+        "comment": null
+      },
+      {
+        "name": "courtesy_title",
+        "type": "varchar(50)",
+        "nullable": true,
+        "default": "NULL",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "given_names",
+        "type": "varchar(150)",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "family_names",
+        "type": "varchar(150)",
+        "nullable": true,
+        "default": "NULL",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "birth_date",
+        "type": "date",
+        "nullable": true,
+        "default": "NULL",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "gender",
+        "type": "enum('hombre','mujer','Prefiero no decirlo')",
+        "nullable": false,
+        "default": "'Prefiero no decirlo'",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "country_code",
+        "type": "char(2)",
+        "nullable": true,
+        "default": "NULL",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "phone",
+        "type": "varchar(25)",
+        "nullable": true,
+        "default": "NULL",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "status",
+        "type": "bit(1)",
+        "nullable": true,
+        "default": "b'1'",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "creation_date",
+        "type": "datetime",
+        "nullable": true,
+        "default": "CURRENT_TIMESTAMP",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "last_update",
+        "type": "datetime",
+        "nullable": true,
+        "default": "CURRENT_TIMESTAMP",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      }
+    ],
+    "primaryKey": [
+      "person_ID"
+    ],
+    "primaryKeyDefinition": "PRIMARY KEY (`person_ID`)",
+    "uniqueKeys": [
+      {
+        "name": "uq_tb_people_user_ID",
+        "columns": [
+          "user_ID"
+        ],
+        "definition": "UNIQUE KEY `uq_tb_people_user_ID` (`user_ID`)"
+      }
+    ],
+    "indexes": [],
+    "foreignKeys": [
+      {
+        "name": "fk_people_users",
+        "columns": [
+          "user_ID"
+        ],
+        "referencesTable": "db_users",
+        "referencesColumns": [
+          "ID"
+        ],
+        "definition": "CONSTRAINT `fk_people_users` FOREIGN KEY (`user_ID`) REFERENCES `db_users` (`ID`)",
+        "onDelete": null,
+        "onUpdate": null
+      }
+    ],
+    "checks": [],
+    "engine": "InnoDB"
+  },
+  {
+    "name": "tb_products",
+    "columns": [
+      {
+        "name": "ID",
+        "type": "int unsigned",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": true,
+        "generated": null,
+        "unique": false,
+        "primary": true,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "SKU",
+        "type": "varchar(50)",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": true,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "name",
+        "type": "varchar(250)",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "description",
+        "type": "text",
+        "nullable": true,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "current_price",
+        "type": "decimal(10,2)",
+        "nullable": false,
+        "default": "'0.00'",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "current_stock",
+        "type": "int unsigned",
+        "nullable": false,
+        "default": "'0'",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "status",
+        "type": "bit(1)",
+        "nullable": true,
+        "default": "b'1'",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "creation_date",
+        "type": "datetime",
+        "nullable": false,
+        "default": "CURRENT_TIMESTAMP",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "last_update",
+        "type": "datetime",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      }
+    ],
+    "primaryKey": [
+      "ID"
+    ],
+    "primaryKeyDefinition": "PRIMARY KEY (`ID`)",
+    "uniqueKeys": [
+      {
+        "name": "SKU",
+        "columns": [
+          "SKU"
+        ],
+        "definition": "UNIQUE KEY `SKU` (`SKU`)"
+      }
+    ],
+    "indexes": [],
+    "foreignKeys": [],
+    "checks": [],
+    "engine": "InnoDB"
+  },
+  {
+    "name": "tb_refunds",
+    "columns": [
+      {
+        "name": "ID",
+        "type": "int unsigned",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": true,
+        "generated": null,
+        "unique": false,
+        "primary": true,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "payment_ID",
+        "type": "int unsigned",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": true,
+        "comment": null
+      },
+      {
+        "name": "cancellation_ID",
+        "type": "int unsigned",
+        "nullable": true,
+        "default": "NULL",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": true,
+        "comment": null
+      },
+      {
+        "name": "return_ID",
+        "type": "int unsigned",
+        "nullable": true,
+        "default": "NULL",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": true,
+        "comment": null
+      },
+      {
+        "name": "amount",
+        "type": "decimal(12,2)",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "currency",
+        "type": "char(3)",
+        "nullable": false,
+        "default": "'MXN'",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "refund_reason",
+        "type": "varchar(500)",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "refund_status",
+        "type": "enum('Requested','Approved','Processing','Completed','Rejected','Failed')",
+        "nullable": false,
+        "default": "'Requested'",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "provider_reference",
+        "type": "varchar(150)",
+        "nullable": true,
+        "default": "NULL",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "requested_date",
+        "type": "datetime",
+        "nullable": false,
+        "default": "CURRENT_TIMESTAMP",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "processed_date",
+        "type": "datetime",
+        "nullable": true,
+        "default": "NULL",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "resolution_notes",
+        "type": "text",
+        "nullable": true,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "status",
+        "type": "bit(1)",
+        "nullable": false,
+        "default": "b'1'",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "creation_date",
+        "type": "datetime",
+        "nullable": false,
+        "default": "CURRENT_TIMESTAMP",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "last_update",
+        "type": "datetime",
+        "nullable": true,
+        "default": "NULL",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      }
+    ],
+    "primaryKey": [
+      "ID"
+    ],
+    "primaryKeyDefinition": "PRIMARY KEY (`ID`)",
+    "uniqueKeys": [],
+    "indexes": [
+      {
+        "name": "idx_refund_payment",
+        "columns": [
+          "payment_ID"
+        ],
+        "unique": false,
+        "definition": "KEY `idx_refund_payment` (`payment_ID`)"
+      },
+      {
+        "name": "idx_refund_cancellation",
+        "columns": [
+          "cancellation_ID"
+        ],
+        "unique": false,
+        "definition": "KEY `idx_refund_cancellation` (`cancellation_ID`)"
+      },
+      {
+        "name": "idx_refund_return",
+        "columns": [
+          "return_ID"
+        ],
+        "unique": false,
+        "definition": "KEY `idx_refund_return` (`return_ID`)"
+      }
+    ],
+    "foreignKeys": [
+      {
+        "name": "fk_refunds_cancellation",
+        "columns": [
+          "cancellation_ID"
+        ],
+        "referencesTable": "tb_cancellations",
+        "referencesColumns": [
+          "ID"
+        ],
+        "definition": "CONSTRAINT `fk_refunds_cancellation` FOREIGN KEY (`cancellation_ID`) REFERENCES `tb_cancellations` (`ID`)",
+        "onDelete": null,
+        "onUpdate": null
+      },
+      {
+        "name": "fk_refunds_payment",
+        "columns": [
+          "payment_ID"
+        ],
+        "referencesTable": "tb_payments",
+        "referencesColumns": [
+          "ID"
+        ],
+        "definition": "CONSTRAINT `fk_refunds_payment` FOREIGN KEY (`payment_ID`) REFERENCES `tb_payments` (`ID`)",
+        "onDelete": null,
+        "onUpdate": null
+      },
+      {
+        "name": "fk_refunds_return",
+        "columns": [
+          "return_ID"
+        ],
+        "referencesTable": "tb_returns",
+        "referencesColumns": [
+          "ID"
+        ],
+        "definition": "CONSTRAINT `fk_refunds_return` FOREIGN KEY (`return_ID`) REFERENCES `tb_returns` (`ID`)",
+        "onDelete": null,
+        "onUpdate": null
+      }
+    ],
+    "checks": [
+      {
+        "name": "chk_refund_amount",
+        "expression": "(`amount` > 0)",
+        "definition": "CONSTRAINT `chk_refund_amount` CHECK ((`amount` > 0))"
+      },
+      {
+        "name": "chk_refund_origin",
+        "expression": "((`cancellation_ID` is not null) or (`return_ID` is not null))",
+        "definition": "CONSTRAINT `chk_refund_origin` CHECK (((`cancellation_ID` is not null) or (`return_ID` is not null)))"
+      }
+    ],
+    "engine": "InnoDB"
+  },
+  {
+    "name": "tb_returns",
+    "columns": [
+      {
+        "name": "ID",
+        "type": "int unsigned",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": true,
+        "generated": null,
+        "unique": false,
+        "primary": true,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "buyer_order_ID",
+        "type": "int unsigned",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": true,
+        "comment": null
+      },
+      {
+        "name": "order_item_ID",
+        "type": "int unsigned",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": true,
+        "comment": null
+      },
+      {
+        "name": "user_ID",
+        "type": "int unsigned",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": true,
+        "comment": null
+      },
+      {
+        "name": "quantity",
+        "type": "int unsigned",
+        "nullable": false,
+        "default": "'1'",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "return_reason",
+        "type": "varchar(500)",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "return_status",
+        "type": "enum('Requested','Authorized','Rejected','InTransit','Received','Inspected','Completed')",
+        "nullable": false,
+        "default": "'Requested'",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "requested_date",
+        "type": "datetime",
+        "nullable": false,
+        "default": "CURRENT_TIMESTAMP",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "received_date",
+        "type": "datetime",
+        "nullable": true,
+        "default": "NULL",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "resolved_date",
+        "type": "datetime",
+        "nullable": true,
+        "default": "NULL",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "resolution_notes",
+        "type": "text",
+        "nullable": true,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "status",
+        "type": "bit(1)",
+        "nullable": false,
+        "default": "b'1'",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "creation_date",
+        "type": "datetime",
+        "nullable": false,
+        "default": "CURRENT_TIMESTAMP",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "last_update",
+        "type": "datetime",
+        "nullable": true,
+        "default": "NULL",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      }
+    ],
+    "primaryKey": [
+      "ID"
+    ],
+    "primaryKeyDefinition": "PRIMARY KEY (`ID`)",
+    "uniqueKeys": [],
+    "indexes": [
+      {
+        "name": "idx_return_order",
+        "columns": [
+          "buyer_order_ID"
+        ],
+        "unique": false,
+        "definition": "KEY `idx_return_order` (`buyer_order_ID`)"
+      },
+      {
+        "name": "idx_return_item",
+        "columns": [
+          "order_item_ID"
+        ],
+        "unique": false,
+        "definition": "KEY `idx_return_item` (`order_item_ID`)"
+      },
+      {
+        "name": "idx_return_user",
+        "columns": [
+          "user_ID"
+        ],
+        "unique": false,
+        "definition": "KEY `idx_return_user` (`user_ID`)"
+      }
+    ],
+    "foreignKeys": [
+      {
+        "name": "fk_returns_item",
+        "columns": [
+          "order_item_ID"
+        ],
+        "referencesTable": "tbd_order_items",
+        "referencesColumns": [
+          "ID"
+        ],
+        "definition": "CONSTRAINT `fk_returns_item` FOREIGN KEY (`order_item_ID`) REFERENCES `tbd_order_items` (`ID`)",
+        "onDelete": null,
+        "onUpdate": null
+      },
+      {
+        "name": "fk_returns_order",
+        "columns": [
+          "buyer_order_ID"
+        ],
+        "referencesTable": "tb_buyer_orders",
+        "referencesColumns": [
+          "ID"
+        ],
+        "definition": "CONSTRAINT `fk_returns_order` FOREIGN KEY (`buyer_order_ID`) REFERENCES `tb_buyer_orders` (`ID`)",
+        "onDelete": null,
+        "onUpdate": null
+      },
+      {
+        "name": "fk_returns_user",
+        "columns": [
+          "user_ID"
+        ],
+        "referencesTable": "db_users",
+        "referencesColumns": [
+          "ID"
+        ],
+        "definition": "CONSTRAINT `fk_returns_user` FOREIGN KEY (`user_ID`) REFERENCES `db_users` (`ID`)",
+        "onDelete": null,
+        "onUpdate": null
+      }
+    ],
+    "checks": [
+      {
+        "name": "chk_return_quantity",
+        "expression": "(`quantity` > 0)",
+        "definition": "CONSTRAINT `chk_return_quantity` CHECK ((`quantity` > 0))"
+      }
+    ],
+    "engine": "InnoDB"
+  },
+  {
+    "name": "tb_shipments",
+    "columns": [
+      {
+        "name": "ID",
+        "type": "int unsigned",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": true,
+        "generated": null,
+        "unique": false,
+        "primary": true,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "buyer_order_ID",
+        "type": "int unsigned",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": true,
+        "comment": null
+      },
+      {
+        "name": "address_ID",
+        "type": "bigint unsigned",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": true,
+        "comment": null
+      },
+      {
+        "name": "carrier",
+        "type": "varchar(100)",
+        "nullable": true,
+        "default": "NULL",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "tracking_number",
+        "type": "varchar(150)",
+        "nullable": true,
+        "default": "NULL",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "shipping_cost",
+        "type": "decimal(12,2)",
+        "nullable": false,
+        "default": "'0.00'",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "shipment_status",
+        "type": "enum('Pending','Preparing','Shipped','InTransit','Delivered','Failed','Returned')",
+        "nullable": false,
+        "default": "'Pending'",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "shipped_date",
+        "type": "datetime",
+        "nullable": true,
+        "default": "NULL",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "estimated_delivery_date",
+        "type": "datetime",
+        "nullable": true,
+        "default": "NULL",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "delivered_date",
+        "type": "datetime",
+        "nullable": true,
+        "default": "NULL",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "status",
+        "type": "bit(1)",
+        "nullable": false,
+        "default": "b'1'",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "creation_date",
+        "type": "datetime",
+        "nullable": false,
+        "default": "CURRENT_TIMESTAMP",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "last_update",
+        "type": "datetime",
+        "nullable": true,
+        "default": "NULL",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      }
+    ],
+    "primaryKey": [
+      "ID"
+    ],
+    "primaryKeyDefinition": "PRIMARY KEY (`ID`)",
+    "uniqueKeys": [
+      {
+        "name": "uk_shipment_tracking",
+        "columns": [
+          "carrier",
+          "tracking_number"
+        ],
+        "definition": "UNIQUE KEY `uk_shipment_tracking` (`carrier`,`tracking_number`)"
+      }
+    ],
+    "indexes": [
+      {
+        "name": "idx_shipment_order",
+        "columns": [
+          "buyer_order_ID"
+        ],
+        "unique": false,
+        "definition": "KEY `idx_shipment_order` (`buyer_order_ID`)"
+      },
+      {
+        "name": "idx_shipment_address",
+        "columns": [
+          "address_ID"
+        ],
+        "unique": false,
+        "definition": "KEY `idx_shipment_address` (`address_ID`)"
+      }
+    ],
+    "foreignKeys": [
+      {
+        "name": "fk_shipments_address",
+        "columns": [
+          "address_ID"
+        ],
+        "referencesTable": "tb_user_addresses",
+        "referencesColumns": [
+          "ID"
+        ],
+        "definition": "CONSTRAINT `fk_shipments_address` FOREIGN KEY (`address_ID`) REFERENCES `tb_user_addresses` (`ID`)",
+        "onDelete": null,
+        "onUpdate": null
+      },
+      {
+        "name": "fk_shipments_order",
+        "columns": [
+          "buyer_order_ID"
+        ],
+        "referencesTable": "tb_buyer_orders",
+        "referencesColumns": [
+          "ID"
+        ],
+        "definition": "CONSTRAINT `fk_shipments_order` FOREIGN KEY (`buyer_order_ID`) REFERENCES `tb_buyer_orders` (`ID`)",
+        "onDelete": null,
+        "onUpdate": null
+      }
+    ],
+    "checks": [
+      {
+        "name": "chk_shipment_cost",
+        "expression": "(`shipping_cost` >= 0)",
+        "definition": "CONSTRAINT `chk_shipment_cost` CHECK ((`shipping_cost` >= 0))"
+      }
+    ],
+    "engine": "InnoDB"
+  },
+  {
+    "name": "tb_user_addresses",
+    "columns": [
+      {
+        "name": "ID",
+        "type": "bigint unsigned",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": true,
+        "generated": null,
+        "unique": false,
+        "primary": true,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "user_ID",
+        "type": "int unsigned",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": true,
+        "comment": null
+      },
+      {
+        "name": "address_label",
+        "type": "varchar(100)",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "recipient_name",
+        "type": "varchar(150)",
+        "nullable": true,
+        "default": "NULL",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "recipient_phone",
+        "type": "varchar(25)",
+        "nullable": true,
+        "default": "NULL",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "delivery_instructions",
+        "type": "varchar(500)",
+        "nullable": true,
+        "default": "NULL",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "latitude",
+        "type": "decimal(10,7)",
+        "nullable": true,
+        "default": "NULL",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "longitude",
+        "type": "decimal(10,7)",
+        "nullable": true,
+        "default": "NULL",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "is_default",
+        "type": "bit(1)",
+        "nullable": false,
+        "default": "b'0'",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "status",
+        "type": "bit(1)",
+        "nullable": false,
+        "default": "b'1'",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "creation_date",
+        "type": "datetime",
+        "nullable": false,
+        "default": "CURRENT_TIMESTAMP",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "last_update",
+        "type": "datetime",
+        "nullable": true,
+        "default": "NULL",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      }
+    ],
+    "primaryKey": [
+      "ID"
+    ],
+    "primaryKeyDefinition": "PRIMARY KEY (`ID`)",
+    "uniqueKeys": [],
+    "indexes": [
+      {
+        "name": "idx_user_addresses",
+        "columns": [
+          "user_ID"
+        ],
+        "unique": false,
+        "definition": "KEY `idx_user_addresses` (`user_ID`)"
+      }
+    ],
+    "foreignKeys": [
+      {
+        "name": "fk_addresses_users",
+        "columns": [
+          "user_ID"
+        ],
+        "referencesTable": "db_users",
+        "referencesColumns": [
+          "ID"
+        ],
+        "definition": "CONSTRAINT `fk_addresses_users` FOREIGN KEY (`user_ID`) REFERENCES `db_users` (`ID`)",
+        "onDelete": null,
+        "onUpdate": null
+      }
+    ],
+    "checks": [
+      {
+        "name": "chk_coordinates",
+        "expression": "(((`latitude` is null) and (`longitude` is null)) or ((`latitude` is not null) and (`longitude` is not null)))",
+        "definition": "CONSTRAINT `chk_coordinates` CHECK ((((`latitude` is null) and (`longitude` is null)) or ((`latitude` is not null) and (`longitude` is not null))))"
+      },
+      {
+        "name": "chk_latitude",
+        "expression": "(`latitude` between -(90) and 90)",
+        "definition": "CONSTRAINT `chk_latitude` CHECK ((`latitude` between -(90) and 90))"
+      },
+      {
+        "name": "chk_longitude",
+        "expression": "(`longitude` between -(180) and 180)",
+        "definition": "CONSTRAINT `chk_longitude` CHECK ((`longitude` between -(180) and 180))"
+      }
+    ],
+    "engine": "InnoDB"
+  },
+  {
+    "name": "tbc_categories",
+    "columns": [
+      {
+        "name": "ID",
+        "type": "int unsigned",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": true,
+        "generated": null,
+        "unique": false,
+        "primary": true,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "name",
+        "type": "varchar(120)",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": true,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "description",
+        "type": "text",
+        "nullable": true,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "sup_id_category",
+        "type": "int unsigned",
+        "nullable": true,
+        "default": "NULL",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": true,
+        "comment": null
+      },
+      {
+        "name": "status",
+        "type": "bit(1)",
+        "nullable": false,
+        "default": "b'1'",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "creation_date",
+        "type": "datetime",
+        "nullable": false,
+        "default": "CURRENT_TIMESTAMP",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "last_update",
+        "type": "datetime",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      }
+    ],
+    "primaryKey": [
+      "ID"
+    ],
+    "primaryKeyDefinition": "PRIMARY KEY (`ID`)",
+    "uniqueKeys": [
+      {
+        "name": "name",
+        "columns": [
+          "name"
+        ],
+        "definition": "UNIQUE KEY `name` (`name`)"
+      }
+    ],
+    "indexes": [
+      {
+        "name": "fk_superior_category",
+        "columns": [
+          "sup_id_category"
+        ],
+        "unique": false,
+        "definition": "KEY `fk_superior_category` (`sup_id_category`)"
+      }
+    ],
+    "foreignKeys": [
+      {
+        "name": "fk_superior_category",
+        "columns": [
+          "sup_id_category"
+        ],
+        "referencesTable": "tbc_categories",
+        "referencesColumns": [
+          "ID"
+        ],
+        "definition": "CONSTRAINT `fk_superior_category` FOREIGN KEY (`sup_id_category`) REFERENCES `tbc_categories` (`ID`)",
+        "onDelete": null,
+        "onUpdate": null
+      }
+    ],
+    "checks": [],
+    "engine": "InnoDB"
+  },
+  {
+    "name": "tbc_payment_methods_types",
+    "columns": [
+      {
+        "name": "ID",
+        "type": "int unsigned",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": true,
+        "generated": null,
+        "unique": false,
+        "primary": true,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "code",
+        "type": "varchar(30)",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": true,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "description",
+        "type": "text",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "status",
+        "type": "bit(1)",
+        "nullable": false,
+        "default": "b'1'",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "creation_date",
+        "type": "datetime",
+        "nullable": false,
+        "default": "CURRENT_TIMESTAMP",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "last_update",
+        "type": "datetime",
+        "nullable": true,
+        "default": "NULL",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      }
+    ],
+    "primaryKey": [
+      "ID"
+    ],
+    "primaryKeyDefinition": "PRIMARY KEY (`ID`)",
+    "uniqueKeys": [
+      {
+        "name": "code_unique",
+        "columns": [
+          "code"
+        ],
+        "definition": "UNIQUE KEY `code_unique` (`code`)"
+      }
+    ],
+    "indexes": [],
+    "foreignKeys": [],
+    "checks": [],
+    "engine": "InnoDB"
+  },
+  {
+    "name": "tbd_address_components",
+    "columns": [
+      {
+        "name": "ID",
+        "type": "bigint unsigned",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": true,
+        "generated": null,
+        "unique": false,
+        "primary": true,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "address_ID",
+        "type": "bigint unsigned",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": true,
+        "comment": null
+      },
+      {
+        "name": "value",
+        "type": "varchar(255)",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "component_type",
+        "type": "varchar(50)",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "status",
+        "type": "bit(1)",
+        "nullable": false,
+        "default": "b'1'",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "address_sup_ID",
+        "type": "bigint unsigned",
+        "nullable": true,
+        "default": "NULL",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": true,
+        "comment": null
+      },
+      {
+        "name": "creation_date",
+        "type": "datetime",
+        "nullable": false,
+        "default": "CURRENT_TIMESTAMP",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "last_update",
+        "type": "datetime",
+        "nullable": true,
+        "default": "NULL",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      }
+    ],
+    "primaryKey": [
+      "ID"
+    ],
+    "primaryKeyDefinition": "PRIMARY KEY (`ID`)",
+    "uniqueKeys": [
+      {
+        "name": "uk_address_component",
+        "columns": [
+          "address_ID",
+          "ID"
+        ],
+        "definition": "UNIQUE KEY `uk_address_component` (`address_ID`,`ID`)"
+      }
+    ],
+    "indexes": [
+      {
+        "name": "idx_address_parent",
+        "columns": [
+          "address_ID",
+          "address_sup_ID"
+        ],
+        "unique": false,
+        "definition": "KEY `idx_address_parent` (`address_ID`,`address_sup_ID`)"
+      }
+    ],
+    "foreignKeys": [
+      {
+        "name": "fk_component_address",
+        "columns": [
+          "address_ID"
+        ],
+        "referencesTable": "tb_user_addresses",
+        "referencesColumns": [
+          "ID"
+        ],
+        "definition": "CONSTRAINT `fk_component_address` FOREIGN KEY (`address_ID`) REFERENCES `tb_user_addresses` (`ID`) ON DELETE RESTRICT",
+        "onDelete": "RESTRICT",
+        "onUpdate": null
+      },
+      {
+        "name": "fk_component_parent",
+        "columns": [
+          "address_ID",
+          "address_sup_ID"
+        ],
+        "referencesTable": "tbd_address_components",
+        "referencesColumns": [
+          "address_ID",
+          "ID"
+        ],
+        "definition": "CONSTRAINT `fk_component_parent` FOREIGN KEY (`address_ID`, `address_sup_ID`) REFERENCES `tbd_address_components` (`address_ID`, `ID`) ON DELETE RESTRICT",
+        "onDelete": "RESTRICT",
+        "onUpdate": null
+      }
+    ],
+    "checks": [],
+    "engine": "InnoDB"
+  },
+  {
+    "name": "tbd_cancellation_items",
+    "columns": [
+      {
+        "name": "ID",
+        "type": "int unsigned",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": true,
+        "generated": null,
+        "unique": false,
+        "primary": true,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "cancellation_ID",
+        "type": "int unsigned",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": true,
+        "comment": null
+      },
+      {
+        "name": "order_item_ID",
+        "type": "int unsigned",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": true,
+        "comment": null
+      },
+      {
+        "name": "quantity",
+        "type": "int unsigned",
+        "nullable": false,
+        "default": "'1'",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "unit_amount",
+        "type": "decimal(12,2)",
+        "nullable": false,
+        "default": "'0.00'",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "item_reason",
+        "type": "varchar(500)",
+        "nullable": true,
+        "default": "NULL",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "status",
+        "type": "bit(1)",
+        "nullable": false,
+        "default": "b'1'",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "creation_date",
+        "type": "datetime",
+        "nullable": false,
+        "default": "CURRENT_TIMESTAMP",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "last_update",
+        "type": "datetime",
+        "nullable": true,
+        "default": "NULL",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      }
+    ],
+    "primaryKey": [
+      "ID"
+    ],
+    "primaryKeyDefinition": "PRIMARY KEY (`ID`)",
+    "uniqueKeys": [],
+    "indexes": [
+      {
+        "name": "idx_cancellation_items_cancellation",
+        "columns": [
+          "cancellation_ID"
+        ],
+        "unique": false,
+        "definition": "KEY `idx_cancellation_items_cancellation` (`cancellation_ID`)"
+      },
+      {
+        "name": "idx_cancellation_items_order_item",
+        "columns": [
+          "order_item_ID"
+        ],
+        "unique": false,
+        "definition": "KEY `idx_cancellation_items_order_item` (`order_item_ID`)"
+      }
+    ],
+    "foreignKeys": [
+      {
+        "name": "fk_cancellation_items_cancellation",
+        "columns": [
+          "cancellation_ID"
+        ],
+        "referencesTable": "tb_cancellations",
+        "referencesColumns": [
+          "ID"
+        ],
+        "definition": "CONSTRAINT `fk_cancellation_items_cancellation` FOREIGN KEY (`cancellation_ID`) REFERENCES `tb_cancellations` (`ID`)",
+        "onDelete": null,
+        "onUpdate": null
+      },
+      {
+        "name": "fk_cancellation_items_order_item",
+        "columns": [
+          "order_item_ID"
+        ],
+        "referencesTable": "tbd_order_items",
+        "referencesColumns": [
+          "ID"
+        ],
+        "definition": "CONSTRAINT `fk_cancellation_items_order_item` FOREIGN KEY (`order_item_ID`) REFERENCES `tbd_order_items` (`ID`)",
+        "onDelete": null,
+        "onUpdate": null
+      }
+    ],
+    "checks": [
+      {
+        "name": "chk_cancellation_items_amount",
+        "expression": "(`unit_amount` >= 0)",
+        "definition": "CONSTRAINT `chk_cancellation_items_amount` CHECK ((`unit_amount` >= 0))"
+      },
+      {
+        "name": "chk_cancellation_items_quantity",
+        "expression": "(`quantity` > 0)",
+        "definition": "CONSTRAINT `chk_cancellation_items_quantity` CHECK ((`quantity` > 0))"
+      }
+    ],
+    "engine": "InnoDB"
+  },
+  {
+    "name": "tbd_carts_items",
+    "columns": [
+      {
+        "name": "cart_ID",
+        "type": "int unsigned",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": true,
+        "foreignKey": true,
+        "comment": null
+      },
+      {
+        "name": "provider_ID",
+        "type": "int unsigned",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": true,
+        "foreignKey": true,
+        "comment": null
+      },
+      {
+        "name": "product_ID",
+        "type": "int unsigned",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": true,
+        "foreignKey": true,
+        "comment": null
+      },
+      {
+        "name": "quantity",
+        "type": "int unsigned",
+        "nullable": false,
+        "default": "'1'",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "creation_date",
+        "type": "datetime",
+        "nullable": false,
+        "default": "CURRENT_TIMESTAMP",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      }
+    ],
+    "primaryKey": [
+      "cart_ID",
+      "provider_ID",
+      "product_ID"
+    ],
+    "primaryKeyDefinition": "PRIMARY KEY (`cart_ID`,`provider_ID`,`product_ID`)",
+    "uniqueKeys": [],
+    "indexes": [
+      {
+        "name": "idx_carts_items_provider_product",
+        "columns": [
+          "provider_ID",
+          "product_ID"
+        ],
+        "unique": false,
+        "definition": "KEY `idx_carts_items_provider_product` (`provider_ID`,`product_ID`)"
+      }
+    ],
+    "foreignKeys": [
+      {
+        "name": "fk_carts_items_cart",
+        "columns": [
+          "cart_ID"
+        ],
+        "referencesTable": "tb_carts",
+        "referencesColumns": [
+          "ID"
+        ],
+        "definition": "CONSTRAINT `fk_carts_items_cart` FOREIGN KEY (`cart_ID`) REFERENCES `tb_carts` (`ID`)",
+        "onDelete": null,
+        "onUpdate": null
+      },
+      {
+        "name": "fk_carts_items_provider_product",
+        "columns": [
+          "provider_ID",
+          "product_ID"
+        ],
+        "referencesTable": "tbd_products_users",
+        "referencesColumns": [
+          "user_ID",
+          "product_ID"
+        ],
+        "definition": "CONSTRAINT `fk_carts_items_provider_product` FOREIGN KEY (`provider_ID`, `product_ID`) REFERENCES `tbd_products_users` (`user_ID`, `product_ID`)",
+        "onDelete": null,
+        "onUpdate": null
+      }
+    ],
+    "checks": [
+      {
+        "name": "chk_carts_items_quantity",
+        "expression": "(`quantity` > 0)",
+        "definition": "CONSTRAINT `chk_carts_items_quantity` CHECK ((`quantity` > 0))"
+      }
+    ],
+    "engine": "InnoDB"
+  },
+  {
+    "name": "tbd_order_items",
+    "columns": [
+      {
+        "name": "ID",
+        "type": "int unsigned",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": true,
+        "generated": null,
+        "unique": false,
+        "primary": true,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "seller_order_ID",
+        "type": "int unsigned",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": true,
+        "comment": null
+      },
+      {
+        "name": "product_ID",
+        "type": "int unsigned",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": true,
+        "comment": null
+      },
+      {
+        "name": "provider_ID",
+        "type": "int unsigned",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": true,
+        "comment": null
+      },
+      {
+        "name": "product_name",
+        "type": "varchar(255)",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "quantity",
+        "type": "int unsigned",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "unit_price",
+        "type": "decimal(12,2)",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "subtotal",
+        "type": "decimal(12,2)",
+        "nullable": true,
+        "default": null,
+        "autoIncrement": false,
+        "generated": {
+          "expression": "(`quantity` * `unit_price`",
+          "storage": null
+        },
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "creation_date",
+        "type": "datetime",
+        "nullable": false,
+        "default": "CURRENT_TIMESTAMP",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      }
+    ],
+    "primaryKey": [
+      "ID"
+    ],
+    "primaryKeyDefinition": "PRIMARY KEY (`ID`)",
+    "uniqueKeys": [],
+    "indexes": [
+      {
+        "name": "idx_order_items_seller_order",
+        "columns": [
+          "seller_order_ID"
+        ],
+        "unique": false,
+        "definition": "KEY `idx_order_items_seller_order` (`seller_order_ID`)"
+      },
+      {
+        "name": "idx_order_items_provider_product",
+        "columns": [
+          "provider_ID",
+          "product_ID"
+        ],
+        "unique": false,
+        "definition": "KEY `idx_order_items_provider_product` (`provider_ID`,`product_ID`)"
+      }
+    ],
+    "foreignKeys": [
+      {
+        "name": "fk_order_items_buyer_order",
+        "columns": [
+          "seller_order_ID"
+        ],
+        "referencesTable": "tb_buyer_orders",
+        "referencesColumns": [
+          "ID"
+        ],
+        "definition": "CONSTRAINT `fk_order_items_buyer_order` FOREIGN KEY (`seller_order_ID`) REFERENCES `tb_buyer_orders` (`ID`)",
+        "onDelete": null,
+        "onUpdate": null
+      },
+      {
+        "name": "fk_order_items_provider_product",
+        "columns": [
+          "provider_ID",
+          "product_ID"
+        ],
+        "referencesTable": "tbd_products_users",
+        "referencesColumns": [
+          "user_ID",
+          "product_ID"
+        ],
+        "definition": "CONSTRAINT `fk_order_items_provider_product` FOREIGN KEY (`provider_ID`, `product_ID`) REFERENCES `tbd_products_users` (`user_ID`, `product_ID`)",
+        "onDelete": null,
+        "onUpdate": null
+      }
+    ],
+    "checks": [
+      {
+        "name": "chk_order_items_quantity",
+        "expression": "(`quantity` > 0)",
+        "definition": "CONSTRAINT `chk_order_items_quantity` CHECK ((`quantity` > 0))"
+      },
+      {
+        "name": "chk_order_items_unit_price",
+        "expression": "(`unit_price` >= 0)",
+        "definition": "CONSTRAINT `chk_order_items_unit_price` CHECK ((`unit_price` >= 0))"
+      }
+    ],
+    "engine": "InnoDB"
+  },
+  {
+    "name": "tbd_products_categories",
+    "columns": [
+      {
+        "name": "product_Id",
+        "type": "int unsigned",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": true,
+        "foreignKey": true,
+        "comment": null
+      },
+      {
+        "name": "category_Id",
+        "type": "int unsigned",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": true,
+        "foreignKey": true,
+        "comment": null
+      },
+      {
+        "name": "status",
+        "type": "bit(1)",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "creation_date",
+        "type": "datetime",
+        "nullable": false,
+        "default": "CURRENT_TIMESTAMP",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "last_update",
+        "type": "datetime",
+        "nullable": true,
+        "default": "NULL",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      }
+    ],
+    "primaryKey": [
+      "category_Id",
+      "product_Id"
+    ],
+    "primaryKeyDefinition": "PRIMARY KEY (`category_Id`,`product_Id`)",
+    "uniqueKeys": [],
+    "indexes": [
+      {
+        "name": "fk_products_1_idx",
+        "columns": [
+          "product_Id"
+        ],
+        "unique": false,
+        "definition": "KEY `fk_products_1_idx` (`product_Id`)"
+      }
+    ],
+    "foreignKeys": [
+      {
+        "name": "fk_category_1",
+        "columns": [
+          "category_Id"
+        ],
+        "referencesTable": "tbc_categories",
+        "referencesColumns": [
+          "ID"
+        ],
+        "definition": "CONSTRAINT `fk_category_1` FOREIGN KEY (`category_Id`) REFERENCES `tbc_categories` (`ID`)",
+        "onDelete": null,
+        "onUpdate": null
+      },
+      {
+        "name": "fk_products_1",
+        "columns": [
+          "product_Id"
+        ],
+        "referencesTable": "tb_products",
+        "referencesColumns": [
+          "ID"
+        ],
+        "definition": "CONSTRAINT `fk_products_1` FOREIGN KEY (`product_Id`) REFERENCES `tb_products` (`ID`)",
+        "onDelete": null,
+        "onUpdate": null
+      }
+    ],
+    "checks": [],
+    "engine": "InnoDB"
+  },
+  {
+    "name": "tbd_products_users",
+    "columns": [
+      {
+        "name": "user_ID",
+        "type": "int unsigned",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": true,
+        "foreignKey": true,
+        "comment": null
+      },
+      {
+        "name": "product_ID",
+        "type": "int unsigned",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": true,
+        "foreignKey": true,
+        "comment": null
+      },
+      {
+        "name": "type_ownership",
+        "type": "enum('Owner','Reseller','Distributor')",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "status",
+        "type": "bit(1)",
+        "nullable": false,
+        "default": "b'1'",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "avalaible_date",
+        "type": "datetime",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "creation_date",
+        "type": "datetime",
+        "nullable": false,
+        "default": "CURRENT_TIMESTAMP",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "last_update",
+        "type": "datetime",
+        "nullable": false,
+        "default": "CURRENT_TIMESTAMP",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      }
+    ],
+    "primaryKey": [
+      "user_ID",
+      "product_ID"
+    ],
+    "primaryKeyDefinition": "PRIMARY KEY (`user_ID`,`product_ID`)",
+    "uniqueKeys": [],
+    "indexes": [
+      {
+        "name": "fk_products_users_product",
+        "columns": [
+          "product_ID"
+        ],
+        "unique": false,
+        "definition": "KEY `fk_products_users_product` (`product_ID`)"
+      }
+    ],
+    "foreignKeys": [
+      {
+        "name": "fk_products_users_product",
+        "columns": [
+          "product_ID"
+        ],
+        "referencesTable": "tb_products",
+        "referencesColumns": [
+          "ID"
+        ],
+        "definition": "CONSTRAINT `fk_products_users_product` FOREIGN KEY (`product_ID`) REFERENCES `tb_products` (`ID`)",
+        "onDelete": null,
+        "onUpdate": null
+      },
+      {
+        "name": "fk_products_users_user",
+        "columns": [
+          "user_ID"
+        ],
+        "referencesTable": "db_users",
+        "referencesColumns": [
+          "ID"
+        ],
+        "definition": "CONSTRAINT `fk_products_users_user` FOREIGN KEY (`user_ID`) REFERENCES `db_users` (`ID`)",
+        "onDelete": null,
+        "onUpdate": null
+      }
+    ],
+    "checks": [],
+    "engine": "InnoDB"
+  },
+  {
+    "name": "tbd_products_users_providers",
+    "columns": [
+      {
+        "name": "user_ID",
+        "type": "int unsigned",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": true,
+        "foreignKey": true,
+        "comment": null
+      },
+      {
+        "name": "product_ID",
+        "type": "int unsigned",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": true,
+        "foreignKey": true,
+        "comment": null
+      },
+      {
+        "name": "type_ownership",
+        "type": "enum('Owner','Reseller','Distributor')",
+        "nullable": true,
+        "default": "NULL",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "status",
+        "type": "bit(1)",
+        "nullable": false,
+        "default": "b'1'",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "avalaible_date",
+        "type": "datetime",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "creation_date",
+        "type": "datetime",
+        "nullable": false,
+        "default": "CURRENT_TIMESTAMP",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "last_update",
+        "type": "datetime",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      }
+    ],
+    "primaryKey": [
+      "user_ID",
+      "product_ID"
+    ],
+    "primaryKeyDefinition": "PRIMARY KEY (`user_ID`,`product_ID`)",
+    "uniqueKeys": [],
+    "indexes": [
+      {
+        "name": "fk_products2",
+        "columns": [
+          "product_ID"
+        ],
+        "unique": false,
+        "definition": "KEY `fk_products2` (`product_ID`)"
+      }
+    ],
+    "foreignKeys": [
+      {
+        "name": "fk_products2",
+        "columns": [
+          "product_ID"
+        ],
+        "referencesTable": "tb_products",
+        "referencesColumns": [
+          "ID"
+        ],
+        "definition": "CONSTRAINT `fk_products2` FOREIGN KEY (`product_ID`) REFERENCES `tb_products` (`ID`)",
+        "onDelete": null,
+        "onUpdate": null
+      },
+      {
+        "name": "fk_user1",
+        "columns": [
+          "user_ID"
+        ],
+        "referencesTable": "db_users",
+        "referencesColumns": [
+          "ID"
+        ],
+        "definition": "CONSTRAINT `fk_user1` FOREIGN KEY (`user_ID`) REFERENCES `db_users` (`ID`)",
+        "onDelete": null,
+        "onUpdate": null
+      }
+    ],
+    "checks": [],
+    "engine": "InnoDB"
+  },
+  {
+    "name": "tbd_return_items",
+    "columns": [
+      {
+        "name": "ID",
+        "type": "int unsigned",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": true,
+        "generated": null,
+        "unique": false,
+        "primary": true,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "return_ID",
+        "type": "int unsigned",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": true,
+        "comment": null
+      },
+      {
+        "name": "order_item_ID",
+        "type": "int unsigned",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": true,
+        "comment": null
+      },
+      {
+        "name": "quantity",
+        "type": "int unsigned",
+        "nullable": false,
+        "default": "'1'",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "unit_amount",
+        "type": "decimal(12,2)",
+        "nullable": false,
+        "default": "'0.00'",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "item_reason",
+        "type": "varchar(500)",
+        "nullable": true,
+        "default": "NULL",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "item_condition",
+        "type": "enum('Unknown','New','Opened','Damaged')",
+        "nullable": false,
+        "default": "'Unknown'",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "status",
+        "type": "bit(1)",
+        "nullable": false,
+        "default": "b'1'",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "creation_date",
+        "type": "datetime",
+        "nullable": false,
+        "default": "CURRENT_TIMESTAMP",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "last_update",
+        "type": "datetime",
+        "nullable": true,
+        "default": "NULL",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      }
+    ],
+    "primaryKey": [
+      "ID"
+    ],
+    "primaryKeyDefinition": "PRIMARY KEY (`ID`)",
+    "uniqueKeys": [],
+    "indexes": [
+      {
+        "name": "idx_return_items_return",
+        "columns": [
+          "return_ID"
+        ],
+        "unique": false,
+        "definition": "KEY `idx_return_items_return` (`return_ID`)"
+      },
+      {
+        "name": "idx_return_items_order_item",
+        "columns": [
+          "order_item_ID"
+        ],
+        "unique": false,
+        "definition": "KEY `idx_return_items_order_item` (`order_item_ID`)"
+      }
+    ],
+    "foreignKeys": [
+      {
+        "name": "fk_return_items_order_item",
+        "columns": [
+          "order_item_ID"
+        ],
+        "referencesTable": "tbd_order_items",
+        "referencesColumns": [
+          "ID"
+        ],
+        "definition": "CONSTRAINT `fk_return_items_order_item` FOREIGN KEY (`order_item_ID`) REFERENCES `tbd_order_items` (`ID`)",
+        "onDelete": null,
+        "onUpdate": null
+      },
+      {
+        "name": "fk_return_items_return",
+        "columns": [
+          "return_ID"
+        ],
+        "referencesTable": "tb_returns",
+        "referencesColumns": [
+          "ID"
+        ],
+        "definition": "CONSTRAINT `fk_return_items_return` FOREIGN KEY (`return_ID`) REFERENCES `tb_returns` (`ID`)",
+        "onDelete": null,
+        "onUpdate": null
+      }
+    ],
+    "checks": [
+      {
+        "name": "chk_return_items_amount",
+        "expression": "(`unit_amount` >= 0)",
+        "definition": "CONSTRAINT `chk_return_items_amount` CHECK ((`unit_amount` >= 0))"
+      },
+      {
+        "name": "chk_return_items_quantity",
+        "expression": "(`quantity` > 0)",
+        "definition": "CONSTRAINT `chk_return_items_quantity` CHECK ((`quantity` > 0))"
+      }
+    ],
+    "engine": "InnoDB"
+  },
+  {
+    "name": "tbd_user_payment_methods",
+    "columns": [
+      {
+        "name": "ID",
+        "type": "bigint unsigned",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": true,
+        "generated": null,
+        "unique": false,
+        "primary": true,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "user_ID",
+        "type": "int unsigned",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": true,
+        "comment": null
+      },
+      {
+        "name": "payment_method_type_ID",
+        "type": "int unsigned",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": true,
+        "comment": null
+      },
+      {
+        "name": "provider",
+        "type": "varchar(60)",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "provider_method_ref",
+        "type": "varchar(255)",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "label",
+        "type": "varchar(100)",
+        "nullable": true,
+        "default": "NULL",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "last_four",
+        "type": "char(4)",
+        "nullable": true,
+        "default": "NULL",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "is_default",
+        "type": "tinyint(1)",
+        "nullable": false,
+        "default": "'0'",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "status",
+        "type": "bit(1)",
+        "nullable": false,
+        "default": "b'1'",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "creation_date",
+        "type": "datetime",
+        "nullable": false,
+        "default": "CURRENT_TIMESTAMP",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "last_update",
+        "type": "datetime",
+        "nullable": true,
+        "default": "NULL",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      }
+    ],
+    "primaryKey": [
+      "ID"
+    ],
+    "primaryKeyDefinition": "PRIMARY KEY (`ID`)",
+    "uniqueKeys": [
+      {
+        "name": "uk_provider_method",
+        "columns": [
+          "provider",
+          "provider_method_ref"
+        ],
+        "definition": "UNIQUE KEY `uk_provider_method` (`provider`,`provider_method_ref`)"
+      }
+    ],
+    "indexes": [
+      {
+        "name": "user_ID",
+        "columns": [
+          "user_ID"
+        ],
+        "unique": false,
+        "definition": "KEY `user_ID` (`user_ID`)"
+      },
+      {
+        "name": "payment_method_type_ID",
+        "columns": [
+          "payment_method_type_ID"
+        ],
+        "unique": false,
+        "definition": "KEY `payment_method_type_ID` (`payment_method_type_ID`)"
+      }
+    ],
+    "foreignKeys": [
+      {
+        "name": "tbd_user_payment_methods_ibfk_1",
+        "columns": [
+          "user_ID"
+        ],
+        "referencesTable": "db_users",
+        "referencesColumns": [
+          "ID"
+        ],
+        "definition": "CONSTRAINT `tbd_user_payment_methods_ibfk_1` FOREIGN KEY (`user_ID`) REFERENCES `db_users` (`ID`)",
+        "onDelete": null,
+        "onUpdate": null
+      },
+      {
+        "name": "tbd_user_payment_methods_ibfk_2",
+        "columns": [
+          "payment_method_type_ID"
+        ],
+        "referencesTable": "tbc_payment_methods_types",
+        "referencesColumns": [
+          "ID"
+        ],
+        "definition": "CONSTRAINT `tbd_user_payment_methods_ibfk_2` FOREIGN KEY (`payment_method_type_ID`) REFERENCES `tbc_payment_methods_types` (`ID`)",
+        "onDelete": null,
+        "onUpdate": null
+      }
+    ],
+    "checks": [],
+    "engine": "InnoDB"
+  },
+  {
+    "name": "tbd_users_wishlist_products",
+    "columns": [
+      {
+        "name": "user_ID",
+        "type": "int unsigned",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": true,
+        "foreignKey": true,
+        "comment": null
+      },
+      {
+        "name": "product_ID",
+        "type": "int unsigned",
+        "nullable": false,
+        "default": null,
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": true,
+        "foreignKey": true,
+        "comment": null
+      },
+      {
+        "name": "status",
+        "type": "bit(1)",
+        "nullable": false,
+        "default": "b'1'",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "creation_date",
+        "type": "datetime",
+        "nullable": false,
+        "default": "CURRENT_TIMESTAMP",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      },
+      {
+        "name": "last_update",
+        "type": "datetime",
+        "nullable": false,
+        "default": "CURRENT_TIMESTAMP",
+        "autoIncrement": false,
+        "generated": null,
+        "unique": false,
+        "primary": false,
+        "foreignKey": false,
+        "comment": null
+      }
+    ],
+    "primaryKey": [
+      "user_ID",
+      "product_ID"
+    ],
+    "primaryKeyDefinition": "PRIMARY KEY (`user_ID`,`product_ID`)",
+    "uniqueKeys": [],
+    "indexes": [
+      {
+        "name": "idx_wishlist_product",
+        "columns": [
+          "product_ID"
+        ],
+        "unique": false,
+        "definition": "KEY `idx_wishlist_product` (`product_ID`)"
+      }
+    ],
+    "foreignKeys": [
+      {
+        "name": "fk_wishlist_product",
+        "columns": [
+          "product_ID"
+        ],
+        "referencesTable": "tb_products",
+        "referencesColumns": [
+          "ID"
+        ],
+        "definition": "CONSTRAINT `fk_wishlist_product` FOREIGN KEY (`product_ID`) REFERENCES `tb_products` (`ID`)",
+        "onDelete": null,
+        "onUpdate": null
+      },
+      {
+        "name": "fk_wishlist_user",
+        "columns": [
+          "user_ID"
+        ],
+        "referencesTable": "db_users",
+        "referencesColumns": [
+          "ID"
+        ],
+        "definition": "CONSTRAINT `fk_wishlist_user` FOREIGN KEY (`user_ID`) REFERENCES `db_users` (`ID`)",
+        "onDelete": null,
+        "onUpdate": null
+      }
+    ],
+    "checks": [],
+    "engine": "InnoDB"
+  }
+]

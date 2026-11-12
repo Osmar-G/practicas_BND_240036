@@ -1,0 +1,632 @@
+[
+  {
+    "name": "fk_tb_buyer_orders_db_users",
+    "fromTable": "tb_buyer_orders",
+    "fromColumns": [
+      "seller_ID"
+    ],
+    "toTable": "db_users",
+    "toColumns": [
+      "ID"
+    ],
+    "onDelete": null,
+    "onUpdate": null,
+    "definition": "CONSTRAINT `fk_tb_buyer_orders_db_users` FOREIGN KEY (`seller_ID`) REFERENCES `db_users` (`ID`)",
+    "cardinality": "1:N",
+    "confirmed": true
+  },
+  {
+    "name": "fk_cancellations_order",
+    "fromTable": "tb_cancellations",
+    "fromColumns": [
+      "buyer_order_ID"
+    ],
+    "toTable": "tb_buyer_orders",
+    "toColumns": [
+      "ID"
+    ],
+    "onDelete": null,
+    "onUpdate": null,
+    "definition": "CONSTRAINT `fk_cancellations_order` FOREIGN KEY (`buyer_order_ID`) REFERENCES `tb_buyer_orders` (`ID`)",
+    "cardinality": "1:N",
+    "confirmed": true
+  },
+  {
+    "name": "fk_cancellations_user",
+    "fromTable": "tb_cancellations",
+    "fromColumns": [
+      "user_ID"
+    ],
+    "toTable": "db_users",
+    "toColumns": [
+      "ID"
+    ],
+    "onDelete": null,
+    "onUpdate": null,
+    "definition": "CONSTRAINT `fk_cancellations_user` FOREIGN KEY (`user_ID`) REFERENCES `db_users` (`ID`)",
+    "cardinality": "1:N",
+    "confirmed": true
+  },
+  {
+    "name": "fk_carts_user",
+    "fromTable": "tb_carts",
+    "fromColumns": [
+      "user_ID"
+    ],
+    "toTable": "db_users",
+    "toColumns": [
+      "ID"
+    ],
+    "onDelete": null,
+    "onUpdate": null,
+    "definition": "CONSTRAINT `fk_carts_user` FOREIGN KEY (`user_ID`) REFERENCES `db_users` (`ID`)",
+    "cardinality": "1:1",
+    "confirmed": true
+  },
+  {
+    "name": "fk_payment_methods_type",
+    "fromTable": "tb_payment_methods",
+    "fromColumns": [
+      "payment_method_type_ID"
+    ],
+    "toTable": "tbc_payment_methods_types",
+    "toColumns": [
+      "ID"
+    ],
+    "onDelete": null,
+    "onUpdate": null,
+    "definition": "CONSTRAINT `fk_payment_methods_type` FOREIGN KEY (`payment_method_type_ID`) REFERENCES `tbc_payment_methods_types` (`ID`)",
+    "cardinality": "1:N",
+    "confirmed": true
+  },
+  {
+    "name": "fk_payment_methods_user",
+    "fromTable": "tb_payment_methods",
+    "fromColumns": [
+      "user_ID"
+    ],
+    "toTable": "db_users",
+    "toColumns": [
+      "ID"
+    ],
+    "onDelete": null,
+    "onUpdate": null,
+    "definition": "CONSTRAINT `fk_payment_methods_user` FOREIGN KEY (`user_ID`) REFERENCES `db_users` (`ID`)",
+    "cardinality": "1:N",
+    "confirmed": true
+  },
+  {
+    "name": "fk_transactions_payments",
+    "fromTable": "tb_payment_transactions",
+    "fromColumns": [
+      "payment_ID"
+    ],
+    "toTable": "tb_payments",
+    "toColumns": [
+      "ID"
+    ],
+    "onDelete": null,
+    "onUpdate": null,
+    "definition": "CONSTRAINT `fk_transactions_payments` FOREIGN KEY (`payment_ID`) REFERENCES `tb_payments` (`ID`)",
+    "cardinality": "1:N",
+    "confirmed": true
+  },
+  {
+    "name": "fk_payments_buyer_orders",
+    "fromTable": "tb_payments",
+    "fromColumns": [
+      "order_ID"
+    ],
+    "toTable": "tb_buyer_orders",
+    "toColumns": [
+      "ID"
+    ],
+    "onDelete": null,
+    "onUpdate": null,
+    "definition": "CONSTRAINT `fk_payments_buyer_orders` FOREIGN KEY (`order_ID`) REFERENCES `tb_buyer_orders` (`ID`)",
+    "cardinality": "1:N",
+    "confirmed": true
+  },
+  {
+    "name": "fk_people_users",
+    "fromTable": "tb_people",
+    "fromColumns": [
+      "user_ID"
+    ],
+    "toTable": "db_users",
+    "toColumns": [
+      "ID"
+    ],
+    "onDelete": null,
+    "onUpdate": null,
+    "definition": "CONSTRAINT `fk_people_users` FOREIGN KEY (`user_ID`) REFERENCES `db_users` (`ID`)",
+    "cardinality": "1:1",
+    "confirmed": true
+  },
+  {
+    "name": "fk_refunds_cancellation",
+    "fromTable": "tb_refunds",
+    "fromColumns": [
+      "cancellation_ID"
+    ],
+    "toTable": "tb_cancellations",
+    "toColumns": [
+      "ID"
+    ],
+    "onDelete": null,
+    "onUpdate": null,
+    "definition": "CONSTRAINT `fk_refunds_cancellation` FOREIGN KEY (`cancellation_ID`) REFERENCES `tb_cancellations` (`ID`)",
+    "cardinality": "1:N",
+    "confirmed": true
+  },
+  {
+    "name": "fk_refunds_payment",
+    "fromTable": "tb_refunds",
+    "fromColumns": [
+      "payment_ID"
+    ],
+    "toTable": "tb_payments",
+    "toColumns": [
+      "ID"
+    ],
+    "onDelete": null,
+    "onUpdate": null,
+    "definition": "CONSTRAINT `fk_refunds_payment` FOREIGN KEY (`payment_ID`) REFERENCES `tb_payments` (`ID`)",
+    "cardinality": "1:N",
+    "confirmed": true
+  },
+  {
+    "name": "fk_refunds_return",
+    "fromTable": "tb_refunds",
+    "fromColumns": [
+      "return_ID"
+    ],
+    "toTable": "tb_returns",
+    "toColumns": [
+      "ID"
+    ],
+    "onDelete": null,
+    "onUpdate": null,
+    "definition": "CONSTRAINT `fk_refunds_return` FOREIGN KEY (`return_ID`) REFERENCES `tb_returns` (`ID`)",
+    "cardinality": "1:N",
+    "confirmed": true
+  },
+  {
+    "name": "fk_returns_item",
+    "fromTable": "tb_returns",
+    "fromColumns": [
+      "order_item_ID"
+    ],
+    "toTable": "tbd_order_items",
+    "toColumns": [
+      "ID"
+    ],
+    "onDelete": null,
+    "onUpdate": null,
+    "definition": "CONSTRAINT `fk_returns_item` FOREIGN KEY (`order_item_ID`) REFERENCES `tbd_order_items` (`ID`)",
+    "cardinality": "1:N",
+    "confirmed": true
+  },
+  {
+    "name": "fk_returns_order",
+    "fromTable": "tb_returns",
+    "fromColumns": [
+      "buyer_order_ID"
+    ],
+    "toTable": "tb_buyer_orders",
+    "toColumns": [
+      "ID"
+    ],
+    "onDelete": null,
+    "onUpdate": null,
+    "definition": "CONSTRAINT `fk_returns_order` FOREIGN KEY (`buyer_order_ID`) REFERENCES `tb_buyer_orders` (`ID`)",
+    "cardinality": "1:N",
+    "confirmed": true
+  },
+  {
+    "name": "fk_returns_user",
+    "fromTable": "tb_returns",
+    "fromColumns": [
+      "user_ID"
+    ],
+    "toTable": "db_users",
+    "toColumns": [
+      "ID"
+    ],
+    "onDelete": null,
+    "onUpdate": null,
+    "definition": "CONSTRAINT `fk_returns_user` FOREIGN KEY (`user_ID`) REFERENCES `db_users` (`ID`)",
+    "cardinality": "1:N",
+    "confirmed": true
+  },
+  {
+    "name": "fk_shipments_address",
+    "fromTable": "tb_shipments",
+    "fromColumns": [
+      "address_ID"
+    ],
+    "toTable": "tb_user_addresses",
+    "toColumns": [
+      "ID"
+    ],
+    "onDelete": null,
+    "onUpdate": null,
+    "definition": "CONSTRAINT `fk_shipments_address` FOREIGN KEY (`address_ID`) REFERENCES `tb_user_addresses` (`ID`)",
+    "cardinality": "1:N",
+    "confirmed": true
+  },
+  {
+    "name": "fk_shipments_order",
+    "fromTable": "tb_shipments",
+    "fromColumns": [
+      "buyer_order_ID"
+    ],
+    "toTable": "tb_buyer_orders",
+    "toColumns": [
+      "ID"
+    ],
+    "onDelete": null,
+    "onUpdate": null,
+    "definition": "CONSTRAINT `fk_shipments_order` FOREIGN KEY (`buyer_order_ID`) REFERENCES `tb_buyer_orders` (`ID`)",
+    "cardinality": "1:N",
+    "confirmed": true
+  },
+  {
+    "name": "fk_addresses_users",
+    "fromTable": "tb_user_addresses",
+    "fromColumns": [
+      "user_ID"
+    ],
+    "toTable": "db_users",
+    "toColumns": [
+      "ID"
+    ],
+    "onDelete": null,
+    "onUpdate": null,
+    "definition": "CONSTRAINT `fk_addresses_users` FOREIGN KEY (`user_ID`) REFERENCES `db_users` (`ID`)",
+    "cardinality": "1:N",
+    "confirmed": true
+  },
+  {
+    "name": "fk_superior_category",
+    "fromTable": "tbc_categories",
+    "fromColumns": [
+      "sup_id_category"
+    ],
+    "toTable": "tbc_categories",
+    "toColumns": [
+      "ID"
+    ],
+    "onDelete": null,
+    "onUpdate": null,
+    "definition": "CONSTRAINT `fk_superior_category` FOREIGN KEY (`sup_id_category`) REFERENCES `tbc_categories` (`ID`)",
+    "cardinality": "1:N",
+    "confirmed": true
+  },
+  {
+    "name": "fk_component_address",
+    "fromTable": "tbd_address_components",
+    "fromColumns": [
+      "address_ID"
+    ],
+    "toTable": "tb_user_addresses",
+    "toColumns": [
+      "ID"
+    ],
+    "onDelete": "RESTRICT",
+    "onUpdate": null,
+    "definition": "CONSTRAINT `fk_component_address` FOREIGN KEY (`address_ID`) REFERENCES `tb_user_addresses` (`ID`) ON DELETE RESTRICT",
+    "cardinality": "1:N",
+    "confirmed": true
+  },
+  {
+    "name": "fk_component_parent",
+    "fromTable": "tbd_address_components",
+    "fromColumns": [
+      "address_ID",
+      "address_sup_ID"
+    ],
+    "toTable": "tbd_address_components",
+    "toColumns": [
+      "address_ID",
+      "ID"
+    ],
+    "onDelete": "RESTRICT",
+    "onUpdate": null,
+    "definition": "CONSTRAINT `fk_component_parent` FOREIGN KEY (`address_ID`, `address_sup_ID`) REFERENCES `tbd_address_components` (`address_ID`, `ID`) ON DELETE RESTRICT",
+    "cardinality": "1:N",
+    "confirmed": true
+  },
+  {
+    "name": "fk_cancellation_items_cancellation",
+    "fromTable": "tbd_cancellation_items",
+    "fromColumns": [
+      "cancellation_ID"
+    ],
+    "toTable": "tb_cancellations",
+    "toColumns": [
+      "ID"
+    ],
+    "onDelete": null,
+    "onUpdate": null,
+    "definition": "CONSTRAINT `fk_cancellation_items_cancellation` FOREIGN KEY (`cancellation_ID`) REFERENCES `tb_cancellations` (`ID`)",
+    "cardinality": "1:N",
+    "confirmed": true
+  },
+  {
+    "name": "fk_cancellation_items_order_item",
+    "fromTable": "tbd_cancellation_items",
+    "fromColumns": [
+      "order_item_ID"
+    ],
+    "toTable": "tbd_order_items",
+    "toColumns": [
+      "ID"
+    ],
+    "onDelete": null,
+    "onUpdate": null,
+    "definition": "CONSTRAINT `fk_cancellation_items_order_item` FOREIGN KEY (`order_item_ID`) REFERENCES `tbd_order_items` (`ID`)",
+    "cardinality": "1:N",
+    "confirmed": true
+  },
+  {
+    "name": "fk_carts_items_cart",
+    "fromTable": "tbd_carts_items",
+    "fromColumns": [
+      "cart_ID"
+    ],
+    "toTable": "tb_carts",
+    "toColumns": [
+      "ID"
+    ],
+    "onDelete": null,
+    "onUpdate": null,
+    "definition": "CONSTRAINT `fk_carts_items_cart` FOREIGN KEY (`cart_ID`) REFERENCES `tb_carts` (`ID`)",
+    "cardinality": "1:N",
+    "confirmed": true
+  },
+  {
+    "name": "fk_carts_items_provider_product",
+    "fromTable": "tbd_carts_items",
+    "fromColumns": [
+      "provider_ID",
+      "product_ID"
+    ],
+    "toTable": "tbd_products_users",
+    "toColumns": [
+      "user_ID",
+      "product_ID"
+    ],
+    "onDelete": null,
+    "onUpdate": null,
+    "definition": "CONSTRAINT `fk_carts_items_provider_product` FOREIGN KEY (`provider_ID`, `product_ID`) REFERENCES `tbd_products_users` (`user_ID`, `product_ID`)",
+    "cardinality": "1:N",
+    "confirmed": true
+  },
+  {
+    "name": "fk_order_items_buyer_order",
+    "fromTable": "tbd_order_items",
+    "fromColumns": [
+      "seller_order_ID"
+    ],
+    "toTable": "tb_buyer_orders",
+    "toColumns": [
+      "ID"
+    ],
+    "onDelete": null,
+    "onUpdate": null,
+    "definition": "CONSTRAINT `fk_order_items_buyer_order` FOREIGN KEY (`seller_order_ID`) REFERENCES `tb_buyer_orders` (`ID`)",
+    "cardinality": "1:N",
+    "confirmed": true
+  },
+  {
+    "name": "fk_order_items_provider_product",
+    "fromTable": "tbd_order_items",
+    "fromColumns": [
+      "provider_ID",
+      "product_ID"
+    ],
+    "toTable": "tbd_products_users",
+    "toColumns": [
+      "user_ID",
+      "product_ID"
+    ],
+    "onDelete": null,
+    "onUpdate": null,
+    "definition": "CONSTRAINT `fk_order_items_provider_product` FOREIGN KEY (`provider_ID`, `product_ID`) REFERENCES `tbd_products_users` (`user_ID`, `product_ID`)",
+    "cardinality": "1:N",
+    "confirmed": true
+  },
+  {
+    "name": "fk_category_1",
+    "fromTable": "tbd_products_categories",
+    "fromColumns": [
+      "category_Id"
+    ],
+    "toTable": "tbc_categories",
+    "toColumns": [
+      "ID"
+    ],
+    "onDelete": null,
+    "onUpdate": null,
+    "definition": "CONSTRAINT `fk_category_1` FOREIGN KEY (`category_Id`) REFERENCES `tbc_categories` (`ID`)",
+    "cardinality": "1:N",
+    "confirmed": true
+  },
+  {
+    "name": "fk_products_1",
+    "fromTable": "tbd_products_categories",
+    "fromColumns": [
+      "product_Id"
+    ],
+    "toTable": "tb_products",
+    "toColumns": [
+      "ID"
+    ],
+    "onDelete": null,
+    "onUpdate": null,
+    "definition": "CONSTRAINT `fk_products_1` FOREIGN KEY (`product_Id`) REFERENCES `tb_products` (`ID`)",
+    "cardinality": "1:N",
+    "confirmed": true
+  },
+  {
+    "name": "fk_products_users_product",
+    "fromTable": "tbd_products_users",
+    "fromColumns": [
+      "product_ID"
+    ],
+    "toTable": "tb_products",
+    "toColumns": [
+      "ID"
+    ],
+    "onDelete": null,
+    "onUpdate": null,
+    "definition": "CONSTRAINT `fk_products_users_product` FOREIGN KEY (`product_ID`) REFERENCES `tb_products` (`ID`)",
+    "cardinality": "1:N",
+    "confirmed": true
+  },
+  {
+    "name": "fk_products_users_user",
+    "fromTable": "tbd_products_users",
+    "fromColumns": [
+      "user_ID"
+    ],
+    "toTable": "db_users",
+    "toColumns": [
+      "ID"
+    ],
+    "onDelete": null,
+    "onUpdate": null,
+    "definition": "CONSTRAINT `fk_products_users_user` FOREIGN KEY (`user_ID`) REFERENCES `db_users` (`ID`)",
+    "cardinality": "1:N",
+    "confirmed": true
+  },
+  {
+    "name": "fk_products2",
+    "fromTable": "tbd_products_users_providers",
+    "fromColumns": [
+      "product_ID"
+    ],
+    "toTable": "tb_products",
+    "toColumns": [
+      "ID"
+    ],
+    "onDelete": null,
+    "onUpdate": null,
+    "definition": "CONSTRAINT `fk_products2` FOREIGN KEY (`product_ID`) REFERENCES `tb_products` (`ID`)",
+    "cardinality": "1:N",
+    "confirmed": true
+  },
+  {
+    "name": "fk_user1",
+    "fromTable": "tbd_products_users_providers",
+    "fromColumns": [
+      "user_ID"
+    ],
+    "toTable": "db_users",
+    "toColumns": [
+      "ID"
+    ],
+    "onDelete": null,
+    "onUpdate": null,
+    "definition": "CONSTRAINT `fk_user1` FOREIGN KEY (`user_ID`) REFERENCES `db_users` (`ID`)",
+    "cardinality": "1:N",
+    "confirmed": true
+  },
+  {
+    "name": "fk_return_items_order_item",
+    "fromTable": "tbd_return_items",
+    "fromColumns": [
+      "order_item_ID"
+    ],
+    "toTable": "tbd_order_items",
+    "toColumns": [
+      "ID"
+    ],
+    "onDelete": null,
+    "onUpdate": null,
+    "definition": "CONSTRAINT `fk_return_items_order_item` FOREIGN KEY (`order_item_ID`) REFERENCES `tbd_order_items` (`ID`)",
+    "cardinality": "1:N",
+    "confirmed": true
+  },
+  {
+    "name": "fk_return_items_return",
+    "fromTable": "tbd_return_items",
+    "fromColumns": [
+      "return_ID"
+    ],
+    "toTable": "tb_returns",
+    "toColumns": [
+      "ID"
+    ],
+    "onDelete": null,
+    "onUpdate": null,
+    "definition": "CONSTRAINT `fk_return_items_return` FOREIGN KEY (`return_ID`) REFERENCES `tb_returns` (`ID`)",
+    "cardinality": "1:N",
+    "confirmed": true
+  },
+  {
+    "name": "tbd_user_payment_methods_ibfk_1",
+    "fromTable": "tbd_user_payment_methods",
+    "fromColumns": [
+      "user_ID"
+    ],
+    "toTable": "db_users",
+    "toColumns": [
+      "ID"
+    ],
+    "onDelete": null,
+    "onUpdate": null,
+    "definition": "CONSTRAINT `tbd_user_payment_methods_ibfk_1` FOREIGN KEY (`user_ID`) REFERENCES `db_users` (`ID`)",
+    "cardinality": "1:N",
+    "confirmed": true
+  },
+  {
+    "name": "tbd_user_payment_methods_ibfk_2",
+    "fromTable": "tbd_user_payment_methods",
+    "fromColumns": [
+      "payment_method_type_ID"
+    ],
+    "toTable": "tbc_payment_methods_types",
+    "toColumns": [
+      "ID"
+    ],
+    "onDelete": null,
+    "onUpdate": null,
+    "definition": "CONSTRAINT `tbd_user_payment_methods_ibfk_2` FOREIGN KEY (`payment_method_type_ID`) REFERENCES `tbc_payment_methods_types` (`ID`)",
+    "cardinality": "1:N",
+    "confirmed": true
+  },
+  {
+    "name": "fk_wishlist_product",
+    "fromTable": "tbd_users_wishlist_products",
+    "fromColumns": [
+      "product_ID"
+    ],
+    "toTable": "tb_products",
+    "toColumns": [
+      "ID"
+    ],
+    "onDelete": null,
+    "onUpdate": null,
+    "definition": "CONSTRAINT `fk_wishlist_product` FOREIGN KEY (`product_ID`) REFERENCES `tb_products` (`ID`)",
+    "cardinality": "1:N",
+    "confirmed": true
+  },
+  {
+    "name": "fk_wishlist_user",
+    "fromTable": "tbd_users_wishlist_products",
+    "fromColumns": [
+      "user_ID"
+    ],
+    "toTable": "db_users",
+    "toColumns": [
+      "ID"
+    ],
+    "onDelete": null,
+    "onUpdate": null,
+    "definition": "CONSTRAINT `fk_wishlist_user` FOREIGN KEY (`user_ID`) REFERENCES `db_users` (`ID`)",
+    "cardinality": "1:N",
+    "confirmed": true
+  }
+]

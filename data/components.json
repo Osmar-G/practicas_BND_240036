@@ -1,0 +1,1923 @@
+{
+  "views": [],
+  "procedures": [
+    {
+      "name": "sp_generate_test_users",
+      "definition": "CREATE PROCEDURE `sp_generate_test_users`(\r\n    IN p_scenario VARCHAR(20),\r\n    IN p_password VARCHAR(255)\r\n)\r\nBEGIN\r\n    DECLARE v_total INT DEFAULT 0;\r\n    DECLARE v_i INT DEFAULT 0;\r\n    DECLARE v_user_id INT UNSIGNED;\r\n    DECLARE v_status BIT(1);\r\n    DECLARE v_country CHAR(2);\r\n    DECLARE v_gender VARCHAR(30);\r\n    DECLARE v_age INT;\r\n    DECLARE v_birth_date DATE;\r\n    DECLARE v_given_names VARCHAR(150);\r\n    DECLARE v_family_names VARCHAR(150);\r\n    DECLARE v_email VARCHAR(100);\r\n    DECLARE v_nick VARCHAR(50);\r\n    DECLARE v_unique VARCHAR(32);\r\n\r\n    DECLARE EXIT HANDLER FOR SQLEXCEPTION\r\n    BEGIN\r\n        ROLLBACK;\r\n        RESIGNAL;\r\n    END;\r\n\r\n    IF p_password IS NULL OR CHAR_LENGTH(p_password) < 8 THEN\r\n        SIGNAL SQLSTATE '45000'\r\n        SET MESSAGE_TEXT =\r\n            'La contraseña debe tener al menos 8 caracteres';\r\n    END IF;\r\n\r\n    CASE p_scenario\r\n        WHEN 'escenario_1' THEN SET v_total = 500;\r\n        WHEN 'escenario_2' THEN SET v_total = 2000;\r\n        WHEN 'escenario_3' THEN SET v_total = 5000;\r\n        ELSE\r\n            SIGNAL SQLSTATE '45000'\r\n            SET MESSAGE_TEXT =\r\n                'Usa escenario_1, escenario_2 o escenario_3';\r\n    END CASE;\r\n\r\n    START TRANSACTION;\r\n\r\n    WHILE v_i < v_total DO\r\n        SET v_i = v_i + 1;\r\n\r\n        -- Estados: 4000 activos y 1000 inactivos\r\n        -- en el escenario 3.\r\n        IF p_scenario = 'escenario_3' AND v_i > 4000 THEN\r\n            SET v_status = b'0';\r\n        ELSE\r\n            SET v_status = b'1';\r\n        END IF;\r\n\r\n        -- País.\r\n        IF p_scenario = 'escenario_1' THEN\r\n            SET v_country = 'US';\r\n        ELSE\r\n            SET v_country = ELT(\r\n                1 + FLOOR(RAND() * 10),\r\n                'MX', 'CA', 'GB', 'FR', 'DE',\r\n                'ES', 'BR', 'JP', 'AU', 'IN'\r\n            );\r\n        END IF;\r\n\r\n        -- Edad.\r\n        IF p_scenario = 'escenario_2' THEN\r\n            SET v_age = 19 + FLOOR(RAND() * 17);\r\n        ELSE\r\n            SET v_age = 18 + FLOOR(RAND() * 48);\r\n        END IF;\r\n\r\n        SET v_birth_date =\r\n            DATE_SUB(CURDATE(), INTERVAL v_age YEAR)\r\n            - INTERVAL FLOOR(RAND() * 365) DAY;\r\n\r\n        -- Nombres variados.\r\n        SET v_given_names = ELT(\r\n            1 + FLOOR(RAND() * 30),\r\n            'Carlos', 'Maria', 'Jose', 'Ana', 'Luis',\r\n            'Sofia', 'Miguel', 'Lucia', 'Diego', 'Valeria',\r\n            'Daniel', 'Gabriela', 'Alejandro', 'Camila',\r\n            'Fernando', 'Isabella', 'Ricardo', 'Elena',\r\n            'Andres', 'Natalia', 'James', 'Emily',\r\n            'William', 'Olivia', 'Benjamin', 'Charlotte',\r\n            'Noah', 'Amelia', 'Lucas', 'Emma'\r\n        );\r\n\r\n        -- Apellidos variados.\r\n        SET v_family_names = ELT(\r\n            1 + FLOOR(RAND() * 30),\r\n            'Hernandez', 'Garcia', 'Martinez', 'Lopez',\r\n            'Gonzalez', 'Rodriguez', 'Perez', 'Sanchez',\r\n            'Ramirez', 'Torres', 'Flores', 'Rivera',\r\n            'Gomez', 'Diaz', 'Cruz', 'Morales',\r\n            'Reyes', 'Ortiz', 'Gutierrez', 'Castillo',\r\n            'Smith', 'Johnson', 'Brown', 'Williams',\r\n            'Jones', 'Miller', 'Davis', 'Wilson',\r\n            'Anderson', 'Taylor'\r\n        );\r\n\r\n        SET v_gender = ELT(\r\n            1 + FLOOR(RAND() * 3),\r\n            'hombre', 'mujer', 'Prefiero no decirlo'\r\n        );\r\n\r\n        -- Identificador para evitar correos y nicks duplicados.\r\n        SET v_unique = REPLACE(UUID(), '-', '');\r\n\r\n        -- Correo formado con nombre y apellido.\r\n        SET v_email = LOWER(CONCAT(\r\n            v_given_names, '.', v_family_names, '.',\r\n            LEFT(v_unique, 8), '[correo omitido]'\r\n        ));\r\n\r\n        -- Nick basado en el nombre y apellido.\r\n        SET v_nick = LOWER(CONCAT(\r\n            LEFT(v_given_names, 15), '_',\r\n            LEFT(v_family_names, 15), '_',\r\n            LEFT(v_unique, 8)\r\n        ));\r\n\r\n        -- Insertar cuenta.\r\n        INSERT INTO db_users (\r\n            email,\r\n            nick,\r\n            password,\r\n            creation_date,\r\n            last_update,\r\n            last_login,\r\n            status\r\n        )\r\n        VALUES (\r\n            v_email,\r\n            v_nick,\r\n            MD5(p_password),\r\n            CURRENT_TIMESTAMP,\r\n            NULL,\r\n            NULL,\r\n            v_status\r\n        );\r\n\r\n        SET v_user_id = LAST_INSERT_ID();\r\n\r\n        -- Insertar datos personales vinculados al usuario.\r\n        INSERT INTO tb_people (\r\n            user_ID,\r\n            courtesy_title,\r\n            given_names,\r\n            family_names,\r\n            birth_date,\r\n            gender,\r\n            country_code,\r\n            phone,\r\n            status,\r\n            creation_date,\r\n            last_update\r\n        )\r\n        VALUES (\r\n            v_user_id,\r\n            NULL,\r\n            v_given_names,\r\n            v_family_names,\r\n            v_birth_date,\r\n            v_gender,\r\n            v_country,\r\n            CONCAT(\r\n                '+1 ',\r\n                FLOOR(1000000000 + RAND() * 899999999)\r\n            ),\r\n            v_status,\r\n            CURRENT_TIMESTAMP,\r\n            CURRENT_TIMESTAMP\r\n        );\r\n\r\n    END WHILE;\r\n\r\n    COMMIT;\r\n\r\n    SELECT\r\n        p_scenario AS escenario,\r\n        v_total AS usuarios_solicitados,\r\n        'Proceso completado' AS resultado;\r\nEND ;"
+    },
+    {
+      "name": "sp_register_new_user",
+      "definition": "CREATE PROCEDURE `sp_register_new_user`(\r\n    IN p_email          VARCHAR(100),\r\n    IN p_nick           VARCHAR(50),\r\n    IN p_password       VARCHAR(100),\r\n    IN p_courtesy_title VARCHAR(50),\r\n    IN p_given_names    VARCHAR(150),\r\n    IN p_family_names   VARCHAR(150),\r\n    IN p_birth_date     DATE,\r\n    IN p_gender         VARCHAR(30),\r\n    IN p_country_code   VARCHAR(2),\r\n    IN p_phone          VARCHAR(25)\r\n)\r\n    MODIFIES SQL DATA\r\nBEGIN\r\n    DECLARE v_db_user   VARCHAR(32);\r\n    DECLARE v_has_role  INT DEFAULT 0;\r\n    DECLARE v_count     INT DEFAULT 0;\r\n    DECLARE v_user_id   INT UNSIGNED;\r\n    DECLARE v_person_id BIGINT UNSIGNED;\r\n\r\n    DECLARE EXIT HANDLER FOR SQLEXCEPTION\r\n    BEGIN\r\n        ROLLBACK;\r\n        RESIGNAL;\r\n    END;\r\n\r\n    DECLARE EXIT HANDLER FOR 1062\r\n    BEGIN\r\n        ROLLBACK;\r\n        SIGNAL SQLSTATE '45000'\r\n            SET MESSAGE_TEXT = 'El correo, el nick o la relación de persona ya se encuentran registrados';\r\n    END;\r\n\r\n    SET v_db_user = SUBSTRING_INDEX(USER(), '@', 1);\r\n\r\n    -- Requiere permisos para consultar mysql.role_edges.\r\n    SELECT COUNT(*)\r\n      INTO v_has_role\r\n      FROM mysql.role_edges AS re\r\n     WHERE re.TO_USER = v_db_user\r\n       AND re.TO_HOST = '%'\r\n       AND re.FROM_HOST = '%'\r\n       AND re.FROM_USER IN (\r\n           'superadmin', 'admin', 'support', 'user_not_registered'\r\n       );\r\n\r\n    IF v_has_role = 0 THEN\r\n        SIGNAL SQLSTATE '45000'\r\n            SET MESSAGE_TEXT = 'Acceso denegado: rol no autorizado';\r\n    END IF;\r\n\r\n    SET p_email          = LOWER(TRIM(p_email));\r\n    SET p_nick           = TRIM(p_nick);\r\n    SET p_given_names    = TRIM(p_given_names);\r\n    SET p_family_names   = NULLIF(TRIM(p_family_names), '');\r\n    SET p_courtesy_title = NULLIF(TRIM(p_courtesy_title), '');\r\n    SET p_gender         = COALESCE(NULLIF(TRIM(p_gender), ''), 'Prefiero no decirlo');\r\n    SET p_country_code   = NULLIF(UPPER(TRIM(p_country_code)), '');\r\n    SET p_phone          = NULLIF(TRIM(p_phone), '');\r\n\r\n    IF p_email IS NULL OR p_email NOT REGEXP '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\\\.[A-Za-z]{2,}$' THEN\r\n        SIGNAL SQLSTATE '45000'\r\n            SET MESSAGE_TEXT = 'El correo electrónico es inválido';\r\n    END IF;\r\n\r\n    IF p_nick IS NULL OR CHAR_LENGTH(p_nick) < 3 THEN\r\n        SIGNAL SQLSTATE '45000'\r\n            SET MESSAGE_TEXT = 'El nick debe tener al menos 3 caracteres';\r\n    END IF;\r\n\r\n    IF p_password IS NULL OR CHAR_LENGTH(p_password) < 8 THEN\r\n        SIGNAL SQLSTATE '45000'\r\n            SET MESSAGE_TEXT = 'La contraseña debe tener al menos 8 caracteres';\r\n    END IF;\r\n\r\n    IF p_given_names IS NULL OR p_given_names = '' THEN\r\n        SIGNAL SQLSTATE '45000'\r\n            SET MESSAGE_TEXT = 'El nombre es obligatorio';\r\n    END IF;\r\n\r\n    IF p_birth_date IS NOT NULL\r\n       AND (p_birth_date > CURRENT_DATE OR p_birth_date < '1900-01-01') THEN\r\n        SIGNAL SQLSTATE '45000'\r\n            SET MESSAGE_TEXT = 'La fecha de nacimiento es inválida';\r\n    END IF;\r\n\r\n    SET p_gender = CASE\r\n        WHEN LOWER(p_gender) = 'hombre' THEN 'hombre'\r\n        WHEN LOWER(p_gender) = 'mujer' THEN 'mujer'\r\n        WHEN LOWER(p_gender) = 'prefiero no decirlo' THEN 'Prefiero no decirlo'\r\n        ELSE p_gender\r\n    END;\r\n\r\n    IF p_gender NOT IN ('hombre', 'mujer', 'Prefiero no decirlo') THEN\r\n        SIGNAL SQLSTATE '45000'\r\n            SET MESSAGE_TEXT = 'El género debe ser Hombre, Mujer o Prefiero no decirlo';\r\n    END IF;\r\n\r\n    IF p_country_code IS NOT NULL AND p_country_code NOT REGEXP '^[A-Z]{2}$' THEN\r\n        SIGNAL SQLSTATE '45000'\r\n            SET MESSAGE_TEXT = 'El código de país debe tener 2 letras (ISO)';\r\n    END IF;\r\n\r\n    IF p_phone IS NOT NULL AND p_phone NOT REGEXP '^[0-9+() -]{7,25}$' THEN\r\n        SIGNAL SQLSTATE '45000'\r\n            SET MESSAGE_TEXT = 'El teléfono es inválido';\r\n    END IF;\r\n\r\n    SELECT COUNT(*) INTO v_count\r\n      FROM `db_users`\r\n     WHERE `email` = p_email;\r\n\r\n    IF v_count > 0 THEN\r\n        SIGNAL SQLSTATE '45000'\r\n            SET MESSAGE_TEXT = 'El correo electrónico ya se encuentra registrado';\r\n    END IF;\r\n\r\n    SELECT COUNT(*) INTO v_count\r\n      FROM `db_users`\r\n     WHERE `nick` = p_nick;\r\n\r\n    IF v_count > 0 THEN\r\n        SIGNAL SQLSTATE '45000'\r\n            SET MESSAGE_TEXT = 'El nick ya se encuentra en uso';\r\n    END IF;\r\n\r\n    START TRANSACTION;\r\n\r\n    INSERT INTO `db_users` (`email`, `nick`, `password`)\r\n    VALUES (p_email, p_nick, MD5(p_password));\r\n\r\n    SET v_user_id = LAST_INSERT_ID();\r\n\r\n    INSERT INTO `tb_people` (\r\n        `user_ID`, `courtesy_title`, `given_names`, `family_names`,\r\n        `birth_date`, `gender`, `country_code`, `phone`\r\n    )\r\n    VALUES (\r\n        v_user_id, p_courtesy_title, p_given_names, p_family_names,\r\n        p_birth_date, p_gender, p_country_code, p_phone\r\n    );\r\n\r\n    SET v_person_id = LAST_INSERT_ID();\r\n\r\n    COMMIT;\r\n\r\n    SELECT\r\n        'Usuario y persona registrados correctamente' AS mensaje,\r\n        v_user_id AS user_id,\r\n        v_person_id AS person_id,\r\n        p_email AS email,\r\n        p_nick AS nick,\r\n        v_db_user AS ejecutado_por,\r\n        CURRENT_TIMESTAMP AS fecha_operacion;\r\nEND ;"
+    },
+    {
+      "name": "sp_restore_product",
+      "definition": "CREATE PROCEDURE `sp_restore_product`(\r\n    IN p_product_id INT UNSIGNED\r\n)\r\nBEGIN\r\n    IF NOT EXISTS (\r\n        SELECT 1\r\n        FROM tb_products\r\n        WHERE ID = p_product_id\r\n    ) THEN\r\n        SIGNAL SQLSTATE '45000'\r\n        SET MESSAGE_TEXT = 'El producto especificado no existe';\r\n    END IF;\r\n\r\n    IF EXISTS (\r\n        SELECT 1\r\n        FROM tb_products\r\n        WHERE ID = p_product_id\r\n          AND status = b'1'\r\n    ) THEN\r\n        SIGNAL SQLSTATE '45000'\r\n        SET MESSAGE_TEXT = 'El producto ya se encuentra activo';\r\n    END IF;\r\n\r\n    UPDATE tb_products\r\n    SET status = b'1'\r\n    WHERE ID = p_product_id;\r\nEND ;"
+    },
+    {
+      "name": "sp_soft_delete_product",
+      "definition": "CREATE PROCEDURE `sp_soft_delete_product`(\r\n    IN p_product_id INT UNSIGNED\r\n)\r\nBEGIN\r\n\r\n    \r\n    IF NOT EXISTS (\r\n        SELECT 1\r\n        FROM tb_products\r\n        WHERE ID = p_product_id\r\n    ) THEN\r\n        SIGNAL SQLSTATE '45000'\r\n            SET MESSAGE_TEXT = 'El producto especificado no existe';\r\n    END IF;\r\n\r\n    \r\n    IF EXISTS (\r\n        SELECT 1\r\n        FROM tb_products\r\n        WHERE ID = p_product_id\r\n            AND status = b'0'\r\n    ) THEN\r\n        SIGNAL SQLSTATE '45000'\r\n            SET MESSAGE_TEXT = 'El producto ya se encuentra eliminado';\r\n    END IF;\r\n\r\n    \r\n    UPDATE tb_products\r\n    SET status = b'0'\r\n    WHERE ID = p_product_id;\r\n\r\nEND ;"
+    }
+  ],
+  "functions": [],
+  "triggers": [
+    {
+      "name": "trg_users_after_insert",
+      "timing": "AFTER",
+      "event": "INSERT",
+      "table": "db_users",
+      "definition": "CREATE TRIGGER `trg_users_after_insert` AFTER INSERT ON `db_users` FOR EACH ROW BEGIN\r\n    INSERT INTO tb_logs (\r\n        table_name,\r\n        table_operation,\r\n        db_user,\r\n        table_description,\r\n        operation_date,\r\n        operation_status\r\n    )\r\n    VALUES (\r\n        'db_users',\r\n        'Create',\r\n        USER(),\r\n        CONCAT(\r\n            'Usuario Creado. ID=', NEW.ID,\r\n            ', email=', NEW.email,\r\n            ', nick=', NEW.nick,\r\n            ', creation_date=', NEW.creation_date,\r\n            ', status=', NEW.status\r\n        ),\r\n        CURRENT_TIMESTAMP,\r\n        b'1'\r\n    );\r\nEND ;"
+    },
+    {
+      "name": "trg_users_after_update",
+      "timing": "AFTER",
+      "event": "UPDATE",
+      "table": "db_users",
+      "definition": "CREATE TRIGGER `trg_users_after_update` AFTER UPDATE ON `db_users` FOR EACH ROW BEGIN\r\n    INSERT INTO tb_logs (\r\n        table_name,\r\n        table_operation,\r\n        db_user,\r\n        table_description,\r\n        operation_date,\r\n        operation_status\r\n    )\r\n    VALUES (\r\n        'db_users',\r\n        'Update',\r\n        USER(),\r\n        CONCAT(\r\n            'Usuario Actualizado. ID=', NEW.ID,\r\n            ', email: [', OLD.email, '] -> [', NEW.email, ']',\r\n            ', nick: [', OLD.nick, '] -> [', NEW.nick, ']',\r\n            ', creation_date: [', OLD.creation_date, '] -> [', NEW.creation_date, ']',\r\n            ', status: [', OLD.status, '] -> [', NEW.status, ']'\r\n        ),\r\n        CURRENT_TIMESTAMP,\r\n        b'1'\r\n    );\r\nEND ;"
+    },
+    {
+      "name": "trg_users_after_delete",
+      "timing": "AFTER",
+      "event": "DELETE",
+      "table": "db_users",
+      "definition": "CREATE TRIGGER `trg_users_after_delete` AFTER DELETE ON `db_users` FOR EACH ROW BEGIN\r\n    INSERT INTO tb_logs (\r\n        table_name,\r\n        table_operation,\r\n        db_user,\r\n        table_description,\r\n        operation_date,\r\n        operation_status\r\n    )\r\n    VALUES (\r\n        'db_users',\r\n        'Delete',\r\n        USER(),\r\n        CONCAT(\r\n            'Usuario Eliminado. ID=', OLD.ID,\r\n            ', email=', OLD.email,\r\n            ', nick=', OLD.nick,\r\n            ', creation_date=', OLD.creation_date,\r\n            ', status=', OLD.status\r\n        ),\r\n        CURRENT_TIMESTAMP,\r\n        b'1'\r\n    );\r\nEND ;"
+    },
+    {
+      "name": "trg_tb_buyer_orders_after_insert",
+      "timing": "AFTER",
+      "event": "INSERT",
+      "table": "tb_buyer_orders",
+      "definition": "CREATE TRIGGER `trg_tb_buyer_orders_after_insert` AFTER INSERT ON `tb_buyer_orders` FOR EACH ROW BEGIN\r\n    INSERT INTO `tb_logs`\r\n        (`table_name`, `table_operation`, `db_user`, `record_id`, `operation_date`, `table_description`, `operation_status`)\r\n    VALUES\r\n        ('tb_buyer_orders', 'Create', USER(),\r\n         NEW.ID,\r\n         NOW(), CONCAT('Pedido creado. ID=', NEW.ID, ', seller_ID=', NEW.seller_ID, ', subtotal=', NEW.subtotal, ', shipping_cost=', NEW.shipping_cost, ', fulfillment_status=', NEW.fulfillment_status, ', status=', IF(NEW.status=b'1','Activo','Inactivo'), ', creation_date=', NEW.creation_date), b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_tb_buyer_orders_after_update",
+      "timing": "AFTER",
+      "event": "UPDATE",
+      "table": "tb_buyer_orders",
+      "definition": "CREATE TRIGGER `trg_tb_buyer_orders_after_update` AFTER UPDATE ON `tb_buyer_orders` FOR EACH ROW BEGIN\r\n    INSERT INTO `tb_logs`\r\n        (`table_name`, `table_operation`, `db_user`, `record_id`, `operation_date`, `table_description`, `operation_status`)\r\n    VALUES\r\n        ('tb_buyer_orders', 'Update', USER(),\r\n         NEW.ID,\r\n         NOW(), CONCAT('Pedido actualizado. ID=', NEW.ID, ', seller_ID: ', OLD.seller_ID, ' -> ', NEW.seller_ID, ', subtotal: ', OLD.subtotal, ' -> ', NEW.subtotal, ', shipping_cost: ', OLD.shipping_cost, ' -> ', NEW.shipping_cost, ', fulfillment_status: ', OLD.fulfillment_status, ' -> ', NEW.fulfillment_status, ', status: ', IF(OLD.status=b'1','Activo','Inactivo'), ' -> ', IF(NEW.status=b'1','Activo','Inactivo')), b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_tb_buyer_orders_after_delete",
+      "timing": "AFTER",
+      "event": "DELETE",
+      "table": "tb_buyer_orders",
+      "definition": "CREATE TRIGGER `trg_tb_buyer_orders_after_delete` AFTER DELETE ON `tb_buyer_orders` FOR EACH ROW BEGIN\r\n    INSERT INTO `tb_logs`\r\n        (`table_name`, `table_operation`, `db_user`, `record_id`, `operation_date`, `table_description`, `operation_status`)\r\n    VALUES\r\n        ('tb_buyer_orders', 'Delete', USER(),\r\n         OLD.ID,\r\n         NOW(), CONCAT('Pedido eliminado. ID=', OLD.ID, ', seller_ID=', OLD.seller_ID, ', subtotal=', OLD.subtotal, ', shipping_cost=', OLD.shipping_cost, ', fulfillment_status=', OLD.fulfillment_status, ', status=', IF(OLD.status=b'1','Activo','Inactivo')), b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_cancellations_after_insert",
+      "timing": "AFTER",
+      "event": "INSERT",
+      "table": "tb_cancellations",
+      "definition": "CREATE TRIGGER `trg_cancellations_after_insert` AFTER INSERT ON `tb_cancellations` FOR EACH ROW BEGIN\r\n    INSERT INTO tb_logs\r\n        (table_name,table_operation,db_user,table_description,\r\n         operation_date, operation_status)\r\n    VALUES\r\n        ('tb_cancellations', 'Create', USER(),\r\n         CONCAT('Cancelacion creada. ID=', NEW.ID,\r\n                ', pedido=', NEW.buyer_order_ID,\r\n                ', usuario=', NEW.user_ID,\r\n                ', estado=', NEW.cancellation_status,\r\n                ', motivo=', NEW.cancellation_reason),\r\n         NOW(), b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_cancellations_after_update",
+      "timing": "AFTER",
+      "event": "UPDATE",
+      "table": "tb_cancellations",
+      "definition": "CREATE TRIGGER `trg_cancellations_after_update` AFTER UPDATE ON `tb_cancellations` FOR EACH ROW BEGIN\r\n    INSERT INTO tb_logs\r\n        (table_name,table_operation,db_user,table_description,\r\n         operation_date, operation_status)\r\n    VALUES\r\n        ('tb_cancellations', 'Update', USER(),\r\n         CONCAT('Cancelacion ID=', NEW.ID,\r\n                ', pedido=', NEW.buyer_order_ID,\r\n                ', estado: ', OLD.cancellation_status, ' -> ',\r\n                NEW.cancellation_status,\r\n                ', motivo: ', OLD.cancellation_reason, ' -> ',\r\n                NEW.cancellation_reason),\r\n         NOW(), b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_cancellations_after_delete",
+      "timing": "AFTER",
+      "event": "DELETE",
+      "table": "tb_cancellations",
+      "definition": "CREATE TRIGGER `trg_cancellations_after_delete` AFTER DELETE ON `tb_cancellations` FOR EACH ROW BEGIN\r\n    INSERT INTO tb_logs\r\n        (table_name,table_operation,db_user,table_description,\r\n         operation_date, operation_status)\r\n    VALUES\r\n        ('tb_cancellations', 'Delete', USER(),\r\n         CONCAT('Cancelacion eliminada. ID=', OLD.ID,\r\n                ', pedido=', OLD.buyer_order_ID,\r\n                ', usuario=', OLD.user_ID,\r\n                ', estado=', OLD.cancellation_status),\r\n         NOW(), b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_carts_after_insert",
+      "timing": "AFTER",
+      "event": "INSERT",
+      "table": "tb_carts",
+      "definition": "CREATE TRIGGER `trg_carts_after_insert` AFTER INSERT ON `tb_carts` FOR EACH ROW BEGIN\r\n    INSERT INTO `tb_logs`\r\n        (`table_name`, `table_operation`, `db_user`, `record_id`,\r\n         `operation_date`, `table_description`, `operation_status`)\r\n    VALUES\r\n        ('tb_carts', 'Create', USER(), NEW.ID, NOW(),\r\n         CONCAT('Carrito creado. ID=', NEW.ID,\r\n                ', user_ID=', NEW.user_ID,\r\n                ', status=', IF(NEW.status = b'1', 'Activo', 'Inactivo'),\r\n                ', creation_date=', NEW.creation_date),\r\n         b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_carts_after_update",
+      "timing": "AFTER",
+      "event": "UPDATE",
+      "table": "tb_carts",
+      "definition": "CREATE TRIGGER `trg_carts_after_update` AFTER UPDATE ON `tb_carts` FOR EACH ROW BEGIN\r\n    INSERT INTO `tb_logs`\r\n        (`table_name`, `table_operation`, `db_user`, `record_id`,\r\n         `operation_date`, `table_description`, `operation_status`)\r\n    VALUES\r\n        ('tb_carts', 'Update', USER(), NEW.ID, NOW(),\r\n         CONCAT('Carrito actualizado. ID=', NEW.ID,\r\n                ', user_ID: ', OLD.user_ID, ' -> ', NEW.user_ID,\r\n                ', status: ', IF(OLD.status = b'1', 'Activo', 'Inactivo'),\r\n                ' -> ', IF(NEW.status = b'1', 'Activo', 'Inactivo'),\r\n                ', last_update: ', COALESCE(CAST(OLD.last_update AS CHAR), 'NULL'),\r\n                ' -> ', COALESCE(CAST(NEW.last_update AS CHAR), 'NULL')),\r\n         b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_carts_after_delete",
+      "timing": "AFTER",
+      "event": "DELETE",
+      "table": "tb_carts",
+      "definition": "CREATE TRIGGER `trg_carts_after_delete` AFTER DELETE ON `tb_carts` FOR EACH ROW BEGIN\r\n    INSERT INTO `tb_logs`\r\n        (`table_name`, `table_operation`, `db_user`, `record_id`,\r\n         `operation_date`, `table_description`, `operation_status`)\r\n    VALUES\r\n        ('tb_carts', 'Delete', USER(), OLD.ID, NOW(),\r\n         CONCAT('Carrito eliminado. ID=', OLD.ID,\r\n                ', user_ID=', OLD.user_ID,\r\n                ', status=', IF(OLD.status = b'1', 'Activo', 'Inactivo'),\r\n                ', creation_date=', OLD.creation_date),\r\n         b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_payment_methods_ai",
+      "timing": "AFTER",
+      "event": "INSERT",
+      "table": "tb_payment_methods",
+      "definition": "CREATE TRIGGER `trg_payment_methods_ai` AFTER INSERT ON `tb_payment_methods` FOR EACH ROW BEGIN\r\n  INSERT INTO tb_logs\r\n    (table_name,table_operation,db_user,table_description,\r\n     operation_date, operation_status)\r\n  VALUES\r\n    ('tb_payment_methods', 'Create', USER(),\r\n     CONCAT('Registro de pago creado. ID=', NEW.ID,\r\n       ', pedido=', NEW.order_ID,\r\n       ', usuario=', NEW.user_ID,\r\n       ', tipo=', NEW.payment_method_type_ID,\r\n       ', importe=', NEW.amount, ' ', NEW.currency,\r\n       ', estado=', NEW.payment_status),\r\n     NOW(), b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_payment_methods_au",
+      "timing": "AFTER",
+      "event": "UPDATE",
+      "table": "tb_payment_methods",
+      "definition": "CREATE TRIGGER `trg_payment_methods_au` AFTER UPDATE ON `tb_payment_methods` FOR EACH ROW BEGIN\r\n  INSERT INTO tb_logs\r\n    (table_name,table_operation,db_user,table_description,\r\n     operation_date, operation_status)\r\n  VALUES\r\n    ('tb_payment_methods', 'Update', USER(),\r\n     CONCAT('Registro de pago ID=', NEW.ID,\r\n       ', estado: ', OLD.payment_status, ' -> ',\r\n       NEW.payment_status,\r\n       ', importe: ', OLD.amount, ' -> ', NEW.amount,\r\n       ', referencia: ',\r\n       COALESCE(OLD.payment_reference, 'N/D'), ' -> ',\r\n       COALESCE(NEW.payment_reference, 'N/D')),\r\n     NOW(), b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_payment_methods_ad",
+      "timing": "AFTER",
+      "event": "DELETE",
+      "table": "tb_payment_methods",
+      "definition": "CREATE TRIGGER `trg_payment_methods_ad` AFTER DELETE ON `tb_payment_methods` FOR EACH ROW BEGIN\r\n  INSERT INTO tb_logs\r\n    (table_name,table_operation,db_user,table_description,\r\n     operation_date, operation_status)\r\n  VALUES\r\n    ('tb_payment_methods', 'Delete', USER(),\r\n     CONCAT('Registro de pago eliminado. ID=', OLD.ID,\r\n       ', pedido=', OLD.order_ID,\r\n       ', importe=', OLD.amount, ' ', OLD.currency,\r\n       ', estado=', OLD.payment_status),\r\n     NOW(), b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_payment_transactions_ai",
+      "timing": "AFTER",
+      "event": "INSERT",
+      "table": "tb_payment_transactions",
+      "definition": "CREATE TRIGGER `trg_payment_transactions_ai` AFTER INSERT ON `tb_payment_transactions` FOR EACH ROW BEGIN\r\n    INSERT INTO tb_logs\r\n        (table_name,table_operation,db_user,table_description,\r\n         operation_date, operation_status)\r\n    VALUES\r\n        ('tb_payment_transactions', 'Create', USER(),\r\n         CONCAT(\r\n             'Transacción creada. ID=', NEW.ID,\r\n             ', pago relacionado=', NEW.payment_ID,\r\n             ', evento=', NEW.event_type,\r\n             ', importe=', NEW.amount,\r\n             ', referencia=', COALESCE(NEW.event_reference, 'N/A')\r\n         ),\r\n         NOW(), b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_payment_transactions_au",
+      "timing": "AFTER",
+      "event": "UPDATE",
+      "table": "tb_payment_transactions",
+      "definition": "CREATE TRIGGER `trg_payment_transactions_au` AFTER UPDATE ON `tb_payment_transactions` FOR EACH ROW BEGIN\r\n    INSERT INTO tb_logs\r\n        (table_name,table_operation,db_user,table_description,\r\n         operation_date, operation_status)\r\n    VALUES\r\n        ('tb_payment_transactions', 'Update', USER(),\r\n         CONCAT(\r\n             'Transacción actualizada. ID=', NEW.ID,\r\n             ', pago relacionado=', NEW.payment_ID,\r\n             ', evento anterior=', OLD.event_type,\r\n             ', evento nuevo=', NEW.event_type,\r\n             ', importe anterior=', OLD.amount,\r\n             ', importe nuevo=', NEW.amount,\r\n             ', referencia nueva=',\r\n             COALESCE(NEW.event_reference, 'N/A')\r\n         ),\r\n         NOW(), b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_payment_transactions_ad",
+      "timing": "AFTER",
+      "event": "DELETE",
+      "table": "tb_payment_transactions",
+      "definition": "CREATE TRIGGER `trg_payment_transactions_ad` AFTER DELETE ON `tb_payment_transactions` FOR EACH ROW BEGIN\r\n    INSERT INTO tb_logs\r\n        (table_name,table_operation,db_user,table_description,\r\n         operation_date, operation_status)\r\n    VALUES\r\n        ('tb_payment_transactions', 'Delete', USER(),\r\n         CONCAT(\r\n             'Transacción eliminada. ID=', OLD.ID,\r\n             ', pago relacionado=', OLD.payment_ID,\r\n             ', evento=', OLD.event_type,\r\n             ', importe=', OLD.amount,\r\n             ', referencia=',\r\n             COALESCE(OLD.event_reference, 'N/A')\r\n         ),\r\n         NOW(), b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_payments_ai",
+      "timing": "AFTER",
+      "event": "INSERT",
+      "table": "tb_payments",
+      "definition": "CREATE TRIGGER `trg_payments_ai` AFTER INSERT ON `tb_payments` FOR EACH ROW BEGIN\r\n    INSERT INTO tb_logs\r\n        (table_name,table_operation,db_user,table_description,\r\n         operation_date, operation_status)\r\n    VALUES\r\n        ('tb_payments', 'Create', USER(),\r\n         CONCAT(\r\n             'Pago creado. ID=', NEW.ID,\r\n             ', pedido=', NEW.order_ID,\r\n             ', importe=', NEW.amount, ' ', NEW.currency,\r\n             ', método=', NEW.payment_method,\r\n             ', estado=', NEW.payment_status\r\n         ),\r\n         NOW(), b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_payments_au",
+      "timing": "AFTER",
+      "event": "UPDATE",
+      "table": "tb_payments",
+      "definition": "CREATE TRIGGER `trg_payments_au` AFTER UPDATE ON `tb_payments` FOR EACH ROW BEGIN\r\n    INSERT INTO tb_logs\r\n        (table_name,table_operation,db_user,table_description,\r\n         operation_date, operation_status)\r\n    VALUES\r\n        ('tb_payments', 'Update', USER(),\r\n         CONCAT(\r\n             'Pago actualizado. ID=', NEW.ID,\r\n             ', pedido=', NEW.order_ID,\r\n             ', importe anterior=', OLD.amount, ' ', OLD.currency,\r\n             ', importe nuevo=', NEW.amount, ' ', NEW.currency,\r\n             ', estado anterior=', OLD.payment_status,\r\n             ', estado nuevo=', NEW.payment_status,\r\n             ', método nuevo=', NEW.payment_method\r\n         ),\r\n         NOW(), b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_payments_ad",
+      "timing": "AFTER",
+      "event": "DELETE",
+      "table": "tb_payments",
+      "definition": "CREATE TRIGGER `trg_payments_ad` AFTER DELETE ON `tb_payments` FOR EACH ROW BEGIN\r\n    INSERT INTO tb_logs\r\n        (table_name,table_operation,db_user,table_description,\r\n         operation_date, operation_status)\r\n    VALUES\r\n        ('tb_payments', 'Delete', USER(),\r\n         CONCAT(\r\n             'Pago eliminado. ID=', OLD.ID,\r\n             ', pedido=', OLD.order_ID,\r\n             ', importe=', OLD.amount, ' ', OLD.currency,\r\n             ', método=', OLD.payment_method,\r\n             ', estado=', OLD.payment_status\r\n         ),\r\n         NOW(), b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_people_after_insert",
+      "timing": "AFTER",
+      "event": "INSERT",
+      "table": "tb_people",
+      "definition": "CREATE TRIGGER `trg_people_after_insert` AFTER INSERT ON `tb_people` FOR EACH ROW BEGIN\r\n    INSERT INTO `tb_logs`\r\n        (`table_name`, `table_operation`, `db_user`, `record_id`,\r\n         `operation_date`, `table_description`, `operation_status`)\r\n    VALUES\r\n        ('tb_people', 'Create', USER(),\r\n         IF(NEW.person_ID <= 4294967295, NEW.person_ID, NULL),\r\n         CURRENT_TIMESTAMP,\r\n         CONCAT('Nueva persona: person_ID=', NEW.person_ID,\r\n                ', user_ID=', COALESCE(CAST(NEW.user_ID AS CHAR), 'NULL'),\r\n                ', given_names=', NEW.given_names,\r\n                ', family_names=', COALESCE(NEW.family_names, 'NULL')),\r\n         b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_people_after_update",
+      "timing": "AFTER",
+      "event": "UPDATE",
+      "table": "tb_people",
+      "definition": "CREATE TRIGGER `trg_people_after_update` AFTER UPDATE ON `tb_people` FOR EACH ROW BEGIN\r\n    INSERT INTO `tb_logs`\r\n        (`table_name`, `table_operation`, `db_user`, `record_id`,\r\n         `operation_date`, `table_description`, `operation_status`)\r\n    VALUES\r\n        ('tb_people', 'Update', USER(),\r\n         IF(NEW.person_ID <= 4294967295, NEW.person_ID, NULL),\r\n         CURRENT_TIMESTAMP,\r\n         CONCAT('Persona actualizada: person_ID=', NEW.person_ID,\r\n                ', user_ID anterior=',\r\n                COALESCE(CAST(OLD.user_ID AS CHAR), 'NULL'),\r\n                ', user_ID nuevo=',\r\n                COALESCE(CAST(NEW.user_ID AS CHAR), 'NULL'),\r\n                ', nombre anterior=', OLD.given_names,\r\n                ', nombre nuevo=', NEW.given_names),\r\n         b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_people_after_delete",
+      "timing": "AFTER",
+      "event": "DELETE",
+      "table": "tb_people",
+      "definition": "CREATE TRIGGER `trg_people_after_delete` AFTER DELETE ON `tb_people` FOR EACH ROW BEGIN\r\n    INSERT INTO `tb_logs`\r\n        (`table_name`, `table_operation`, `db_user`, `record_id`,\r\n         `operation_date`, `table_description`, `operation_status`)\r\n    VALUES\r\n        ('tb_people', 'Delete', USER(),\r\n         IF(OLD.person_ID <= 4294967295, OLD.person_ID, NULL),\r\n         CURRENT_TIMESTAMP,\r\n         CONCAT('Persona eliminada: person_ID=', OLD.person_ID,\r\n                ', user_ID=',\r\n                COALESCE(CAST(OLD.user_ID AS CHAR), 'NULL'),\r\n                ', nombre=', OLD.given_names),\r\n         b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_products_after_insert",
+      "timing": "AFTER",
+      "event": "INSERT",
+      "table": "tb_products",
+      "definition": "CREATE TRIGGER `trg_products_after_insert` AFTER INSERT ON `tb_products` FOR EACH ROW BEGIN\r\n    INSERT INTO tb_logs (\r\n        table_name,\r\n        table_operation,\r\n        db_user,\r\n        record_id,\r\n        table_description,\r\n        operation_date,\r\n        operation_status\r\n    )\r\n    VALUES (\r\n        'tb_products',\r\n        'Create',\r\n        USER(),\r\n        NEW.ID,\r\n        CONCAT(\r\n            'Producto creado. ID=', NEW.ID,\r\n            ',SKU=', NEW.SKU,\r\n            ',name=', NEW.name,\r\n            ',price=', NEW.current_price,\r\n            ',stock=', NEW.current_stock,\r\n            ',status=', NEW.status\r\n        ),\r\n        CURRENT_TIMESTAMP,\r\n        b'1'\r\n    );\r\nEND ;"
+    },
+    {
+      "name": "trg_products_after_update",
+      "timing": "AFTER",
+      "event": "UPDATE",
+      "table": "tb_products",
+      "definition": "CREATE TRIGGER `trg_products_after_update` AFTER UPDATE ON `tb_products` FOR EACH ROW BEGIN\r\n    INSERT INTO tb_logs (\r\n        table_name,\r\n        table_operation,\r\n        db_user,\r\n        table_description,\r\n        operation_date,\r\n        operation_status\r\n    )\r\n    VALUES (\r\n        'tb_products',\r\n        'Update',\r\n        USER(),\r\n        CONCAT(\r\n            'Producto modificado. ID=', NEW.ID,\r\n            ' | Nombre: ', OLD.name, ' -> ', NEW.name,\r\n            ' | Precio: ', OLD.current_price, ' -> ', NEW.current_price,\r\n            ' | Stock: ', OLD.current_stock, ' -> ', NEW.current_stock\r\n        ),\r\n        CURRENT_TIMESTAMP,\r\n        b'1'\r\n    );\r\nEND ;"
+    },
+    {
+      "name": "trg_products_after_delete",
+      "timing": "AFTER",
+      "event": "DELETE",
+      "table": "tb_products",
+      "definition": "CREATE TRIGGER `trg_products_after_delete` AFTER DELETE ON `tb_products` FOR EACH ROW BEGIN\r\n    INSERT INTO tb_logs (\r\n        table_name,\r\n        table_operation,\r\n        db_user,\r\n        table_description,\r\n        operation_date,\r\n        operation_status\r\n    )\r\n    VALUES (\r\n        'tb_products',\r\n        'Delete',\r\n        USER(),\r\n        CONCAT(\r\n            'Producto eliminado. ID=', OLD.ID,\r\n            ',SKU=', OLD.SKU,\r\n            ',name=', OLD.name\r\n        ),\r\n        CURRENT_TIMESTAMP,\r\n        b'1'\r\n    );\r\nEND ;"
+    },
+    {
+      "name": "trg_refunds_after_insert",
+      "timing": "AFTER",
+      "event": "INSERT",
+      "table": "tb_refunds",
+      "definition": "CREATE TRIGGER `trg_refunds_after_insert` AFTER INSERT ON `tb_refunds` FOR EACH ROW BEGIN\r\n    INSERT INTO tb_logs\r\n        (table_name,table_operation,db_user,table_description,\r\n         operation_date, operation_status)\r\n    VALUES\r\n        ('tb_refunds', 'Create', USER(),\r\n         CONCAT('Reembolso creado. ID=', NEW.ID,\r\n                ', pago=', NEW.payment_ID,\r\n                ', cancelacion=', COALESCE(NEW.cancellation_ID, 'N/A'),\r\n                ', devolucion=', COALESCE(NEW.return_ID, 'N/A'),\r\n                ', importe=', NEW.amount, ' ', NEW.currency,\r\n                ', estado=', NEW.refund_status),\r\n         NOW(), b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_refunds_after_update",
+      "timing": "AFTER",
+      "event": "UPDATE",
+      "table": "tb_refunds",
+      "definition": "CREATE TRIGGER `trg_refunds_after_update` AFTER UPDATE ON `tb_refunds` FOR EACH ROW BEGIN\r\n    INSERT INTO tb_logs\r\n        (table_name,table_operation,db_user,table_description,\r\n         operation_date, operation_status)\r\n    VALUES\r\n        ('tb_refunds', 'Update', USER(),\r\n         CONCAT('Reembolso ID=', NEW.ID,\r\n                ', pago=', NEW.payment_ID,\r\n                ', estado: ', OLD.refund_status, ' -> ',\r\n                NEW.refund_status,\r\n                ', importe: ', OLD.amount, ' -> ',\r\n                NEW.amount, ' ', NEW.currency,\r\n                ', referencia: ',\r\n                COALESCE(OLD.provider_reference, 'N/D'), ' -> ',\r\n                COALESCE(NEW.provider_reference, 'N/D')),\r\n         NOW(), b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_refunds_after_delete",
+      "timing": "AFTER",
+      "event": "DELETE",
+      "table": "tb_refunds",
+      "definition": "CREATE TRIGGER `trg_refunds_after_delete` AFTER DELETE ON `tb_refunds` FOR EACH ROW BEGIN\r\n    INSERT INTO tb_logs\r\n        (table_name,table_operation,db_user,table_description,\r\n         operation_date, operation_status)\r\n    VALUES\r\n        ('tb_refunds', 'Delete', USER(),\r\n         CONCAT('Reembolso eliminado. ID=', OLD.ID,\r\n                ', pago=', OLD.payment_ID,\r\n                ', importe=', OLD.amount, ' ', OLD.currency,\r\n                ', estado=', OLD.refund_status),\r\n         NOW(), b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_returns_after_insert",
+      "timing": "AFTER",
+      "event": "INSERT",
+      "table": "tb_returns",
+      "definition": "CREATE TRIGGER `trg_returns_after_insert` AFTER INSERT ON `tb_returns` FOR EACH ROW BEGIN\r\n    INSERT INTO tb_logs\r\n        (table_name,table_operation,db_user,table_description,\r\n         operation_date, operation_status)\r\n    VALUES\r\n        ('tb_returns', 'Create', USER(),\r\n         CONCAT('Devolucion creada. ID=', NEW.ID,\r\n                ', pedido=', NEW.buyer_order_ID,\r\n                ', articulo=', NEW.order_item_ID,\r\n                ', usuario=', NEW.user_ID,\r\n                ', cantidad=', NEW.quantity,\r\n                ', estado=', NEW.return_status,\r\n                ', motivo=', NEW.return_reason),\r\n         NOW(), b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_returns_after_update",
+      "timing": "AFTER",
+      "event": "UPDATE",
+      "table": "tb_returns",
+      "definition": "CREATE TRIGGER `trg_returns_after_update` AFTER UPDATE ON `tb_returns` FOR EACH ROW BEGIN\r\n    INSERT INTO tb_logs\r\n        (table_name,table_operation,db_user,table_description,\r\n         operation_date, operation_status)\r\n    VALUES\r\n        ('tb_returns', 'Update', USER(),\r\n         CONCAT('Devolucion ID=', NEW.ID,\r\n                ', pedido=', NEW.buyer_order_ID,\r\n                ', articulo=', NEW.order_item_ID,\r\n                ', estado: ', OLD.return_status, ' -> ',\r\n                NEW.return_status,\r\n                ', cantidad: ', OLD.quantity, ' -> ',\r\n                NEW.quantity,\r\n                ', motivo: ', OLD.return_reason, ' -> ',\r\n                NEW.return_reason),\r\n         NOW(), b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_returns_after_delete",
+      "timing": "AFTER",
+      "event": "DELETE",
+      "table": "tb_returns",
+      "definition": "CREATE TRIGGER `trg_returns_after_delete` AFTER DELETE ON `tb_returns` FOR EACH ROW BEGIN\r\n    INSERT INTO tb_logs\r\n        (table_name,table_operation,db_user,table_description,\r\n         operation_date, operation_status)\r\n    VALUES\r\n        ('tb_returns', 'Delete', USER(),\r\n         CONCAT('Devolucion eliminada. ID=', OLD.ID,\r\n                ', pedido=', OLD.buyer_order_ID,\r\n                ', articulo=', OLD.order_item_ID,\r\n                ', cantidad=', OLD.quantity,\r\n                ', estado=', OLD.return_status),\r\n         NOW(), b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_shipments_after_insert",
+      "timing": "AFTER",
+      "event": "INSERT",
+      "table": "tb_shipments",
+      "definition": "CREATE TRIGGER `trg_shipments_after_insert` AFTER INSERT ON `tb_shipments` FOR EACH ROW BEGIN\r\n    INSERT INTO tb_logs\r\n        (table_name,table_operation,db_user,table_description,\r\n         operation_date, operation_status)\r\n    VALUES\r\n        ('tb_shipments', 'Create', USER(),\r\n         CONCAT('Envio creado. ID=', NEW.ID,\r\n                ', pedido=', NEW.buyer_order_ID,\r\n                ', direccion=', NEW.address_ID,\r\n                ', transportista=', COALESCE(NEW.carrier, 'N/D'),\r\n                ', rastreo=', COALESCE(NEW.tracking_number, 'N/D'),\r\n                ', estado=', NEW.shipment_status),\r\n         NOW(), b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_shipments_after_update",
+      "timing": "AFTER",
+      "event": "UPDATE",
+      "table": "tb_shipments",
+      "definition": "CREATE TRIGGER `trg_shipments_after_update` AFTER UPDATE ON `tb_shipments` FOR EACH ROW BEGIN\r\n    INSERT INTO tb_logs\r\n        (table_name,table_operation,db_user,table_description,\r\n         operation_date, operation_status)\r\n    VALUES\r\n        ('tb_shipments', 'Update', USER(),\r\n         CONCAT('Envio ID=', NEW.ID,\r\n                ', estado: ', OLD.shipment_status, ' -> ',\r\n                NEW.shipment_status,\r\n                ', rastreo: ',\r\n                COALESCE(OLD.tracking_number, 'N/D'), ' -> ',\r\n                COALESCE(NEW.tracking_number, 'N/D'),\r\n                ', costo: ', OLD.shipping_cost, ' -> ',\r\n                NEW.shipping_cost),\r\n         NOW(), b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_shipments_after_delete",
+      "timing": "AFTER",
+      "event": "DELETE",
+      "table": "tb_shipments",
+      "definition": "CREATE TRIGGER `trg_shipments_after_delete` AFTER DELETE ON `tb_shipments` FOR EACH ROW BEGIN\r\n    INSERT INTO tb_logs\r\n        (table_name,table_operation,db_user,table_description,\r\n         operation_date, operation_status)\r\n    VALUES\r\n        ('tb_shipments', 'Delete', USER(),\r\n         CONCAT('Envio eliminado. ID=', OLD.ID,\r\n                ', pedido=', OLD.buyer_order_ID,\r\n                ', rastreo=', COALESCE(OLD.tracking_number, 'N/D'),\r\n                ', estado=', OLD.shipment_status),\r\n         NOW(), b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_user_addresses_after_insert",
+      "timing": "AFTER",
+      "event": "INSERT",
+      "table": "tb_user_addresses",
+      "definition": "CREATE TRIGGER `trg_user_addresses_after_insert` AFTER INSERT ON `tb_user_addresses` FOR EACH ROW BEGIN\r\n    INSERT INTO `tb_logs`\r\n        (`table_name`, `table_operation`, `db_user`, `record_id`,\r\n         `operation_date`, `table_description`, `operation_status`)\r\n    VALUES\r\n        ('tb_user_addresses', 'Create', USER(),\r\n         IF(NEW.ID <= 4294967295, NEW.ID, NULL),\r\n         CURRENT_TIMESTAMP,\r\n         CONCAT(\r\n             'Direccion creada. ID=', NEW.ID,\r\n             ', user_ID=', NEW.user_ID,\r\n             ', address_label=', NEW.address_label,\r\n             ', recipient_name=', COALESCE(NEW.recipient_name, 'NULL'),\r\n             ', recipient_phone=', COALESCE(NEW.recipient_phone, 'NULL'),\r\n             ', delivery_instructions=', COALESCE(NEW.delivery_instructions, 'NULL'),\r\n             ', latitude=', COALESCE(CAST(NEW.latitude AS CHAR), 'NULL'),\r\n             ', longitude=', COALESCE(CAST(NEW.longitude AS CHAR), 'NULL'),\r\n             ', is_default=', IF(NEW.is_default = b'1', 'Sí', 'No'),\r\n             ', status=', IF(NEW.status = b'1', 'Activo', 'Inactivo')\r\n         ),\r\n         b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_user_addresses_after_update",
+      "timing": "AFTER",
+      "event": "UPDATE",
+      "table": "tb_user_addresses",
+      "definition": "CREATE TRIGGER `trg_user_addresses_after_update` AFTER UPDATE ON `tb_user_addresses` FOR EACH ROW BEGIN\r\n    INSERT INTO `tb_logs`\r\n        (`table_name`, `table_operation`, `db_user`, `record_id`,\r\n         `operation_date`, `table_description`, `operation_status`)\r\n    VALUES\r\n        ('tb_user_addresses', 'Update', USER(),\r\n         IF(NEW.ID <= 4294967295, NEW.ID, NULL),\r\n         CURRENT_TIMESTAMP,\r\n         CONCAT(\r\n             'Direccion actualizada. ID=', NEW.ID,\r\n             ', user_ID: ', OLD.user_ID, ' -> ', NEW.user_ID,\r\n             ', address_label: ', OLD.address_label, ' -> ', NEW.address_label,\r\n             ', recipient_name: ', COALESCE(OLD.recipient_name, 'NULL'), ' -> ', COALESCE(NEW.recipient_name, 'NULL'),\r\n             ', recipient_phone: ', COALESCE(OLD.recipient_phone, 'NULL'), ' -> ', COALESCE(NEW.recipient_phone, 'NULL'),\r\n             ', delivery_instructions: ', COALESCE(OLD.delivery_instructions, 'NULL'), ' -> ', COALESCE(NEW.delivery_instructions, 'NULL'),\r\n             ', latitude: ', COALESCE(CAST(OLD.latitude AS CHAR), 'NULL'), ' -> ', COALESCE(CAST(NEW.latitude AS CHAR), 'NULL'),\r\n             ', longitude: ', COALESCE(CAST(OLD.longitude AS CHAR), 'NULL'), ' -> ', COALESCE(CAST(NEW.longitude AS CHAR), 'NULL'),\r\n             ', is_default: ', IF(OLD.is_default = b'1', 'Sí', 'No'), ' -> ', IF(NEW.is_default = b'1', 'Sí', 'No'),\r\n             ', status: ', IF(OLD.status = b'1', 'Activo', 'Inactivo'), ' -> ', IF(NEW.status = b'1', 'Activo', 'Inactivo')\r\n         ),\r\n         b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_user_addresses_after_delete",
+      "timing": "AFTER",
+      "event": "DELETE",
+      "table": "tb_user_addresses",
+      "definition": "CREATE TRIGGER `trg_user_addresses_after_delete` AFTER DELETE ON `tb_user_addresses` FOR EACH ROW BEGIN\r\n    INSERT INTO `tb_logs`\r\n        (`table_name`, `table_operation`, `db_user`, `record_id`,\r\n         `operation_date`, `table_description`, `operation_status`)\r\n    VALUES\r\n        ('tb_user_addresses', 'Delete', USER(),\r\n         IF(OLD.ID <= 4294967295, OLD.ID, NULL),\r\n         CURRENT_TIMESTAMP,\r\n         CONCAT(\r\n             'Direccion eliminada. ID=', OLD.ID,\r\n             ', user_ID=', OLD.user_ID,\r\n             ', address_label=', OLD.address_label,\r\n             ', recipient_name=', COALESCE(OLD.recipient_name, 'NULL'),\r\n             ', recipient_phone=', COALESCE(OLD.recipient_phone, 'NULL'),\r\n             ', delivery_instructions=', COALESCE(OLD.delivery_instructions, 'NULL'),\r\n             ', latitude=', COALESCE(CAST(OLD.latitude AS CHAR), 'NULL'),\r\n             ', longitude=', COALESCE(CAST(OLD.longitude AS CHAR), 'NULL'),\r\n             ', is_default=', IF(OLD.is_default = b'1', 'Sí', 'No'),\r\n             ', status=', IF(OLD.status = b'1', 'Activo', 'Inactivo')\r\n         ),\r\n         b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_categories_after_insert",
+      "timing": "AFTER",
+      "event": "INSERT",
+      "table": "tbc_categories",
+      "definition": "CREATE TRIGGER `trg_categories_after_insert` AFTER INSERT ON `tbc_categories` FOR EACH ROW BEGIN\r\n    INSERT INTO db_test_7b.tb_logs\r\n    (\r\n        table_name,\r\n        table_operation,\r\n        db_user,\r\n        record_id,\r\n        table_description,\r\n        operation_date,\r\n        operation_status\r\n    )\r\n    VALUES\r\n    (\r\n        'tbc_categories',\r\n        'Create',\r\n        USER(),\r\n        NEW.ID,\r\n        CONCAT(\r\n            'Categoria creada. ID=', NEW.ID,\r\n            ', name=', NEW.name,\r\n            ', description=', COALESCE(NEW.description, 'NULL'),\r\n            ', sup_id_category=', COALESCE(NEW.sup_id_category, 'NULL'),\r\n            ', status=', NEW.status\r\n        ),\r\n        CURRENT_TIMESTAMP,\r\n        b'1'\r\n    );\r\nEND ;"
+    },
+    {
+      "name": "trg_categories_after_update",
+      "timing": "AFTER",
+      "event": "UPDATE",
+      "table": "tbc_categories",
+      "definition": "CREATE TRIGGER `trg_categories_after_update` AFTER UPDATE ON `tbc_categories` FOR EACH ROW BEGIN\r\n    INSERT INTO db_test_7b.tb_logs\r\n    (\r\n        table_name,\r\n        table_operation,\r\n        db_user,\r\n        record_id,\r\n        table_description,\r\n        operation_date,\r\n        operation_status\r\n    )\r\n    VALUES\r\n    (\r\n        'tbc_categories',\r\n        'Update',\r\n        USER(),\r\n        NEW.ID,\r\n        CONCAT(\r\n            'Categoria actualizada. ID=', NEW.ID,\r\n            ', name: ', OLD.name, ' -> ', NEW.name,\r\n            ', description: ',\r\n                COALESCE(OLD.description, 'NULL'),\r\n                ' -> ',\r\n                COALESCE(NEW.description, 'NULL'),\r\n            ', sup_id_category: ',\r\n                COALESCE(OLD.sup_id_category, 'NULL'),\r\n                ' -> ',\r\n                COALESCE(NEW.sup_id_category, 'NULL'),\r\n            ', status: ',\r\n                OLD.status,\r\n                ' -> ',\r\n                NEW.status\r\n        ),\r\n        CURRENT_TIMESTAMP,\r\n        b'1'\r\n    );\r\nEND ;"
+    },
+    {
+      "name": "trg_categories_after_delete",
+      "timing": "AFTER",
+      "event": "DELETE",
+      "table": "tbc_categories",
+      "definition": "CREATE TRIGGER `trg_categories_after_delete` AFTER DELETE ON `tbc_categories` FOR EACH ROW BEGIN\r\n    INSERT INTO db_test_7b.tb_logs\r\n    (\r\n        table_name,\r\n        table_operation,\r\n        db_user,\r\n        record_id,\r\n        table_description,\r\n        operation_date,\r\n        operation_status\r\n    )\r\n    VALUES\r\n    (\r\n        'tbc_categories',\r\n        'Delete',\r\n        USER(),\r\n        OLD.ID,\r\n        CONCAT(\r\n            'Categoria eliminada. ID=', OLD.ID,\r\n            ', name=', OLD.name,\r\n            ', description=', COALESCE(OLD.description, 'NULL'),\r\n            ', sup_id_category=', COALESCE(OLD.sup_id_category, 'NULL'),\r\n            ', status=', OLD.status\r\n        ),\r\n        CURRENT_TIMESTAMP,\r\n        b'1'\r\n    );\r\nEND ;"
+    },
+    {
+      "name": "trg_tbc_payment_methods_types_after_insert",
+      "timing": "AFTER",
+      "event": "INSERT",
+      "table": "tbc_payment_methods_types",
+      "definition": "CREATE TRIGGER `trg_tbc_payment_methods_types_after_insert` AFTER INSERT ON `tbc_payment_methods_types` FOR EACH ROW BEGIN\r\n    INSERT INTO `tb_logs`\r\n        (`table_name`, `table_operation`, `db_user`, `record_id`, `operation_date`, `table_description`, `operation_status`)\r\n    VALUES\r\n        ('tbc_payment_methods_types', 'Create', USER(),\r\n         NEW.ID,\r\n         NOW(), CONCAT('Tipo de m�todo de pago creado. ID=', NEW.ID, ', code=', NEW.code, ', description=', NEW.description, ', status=', IF(NEW.status=b'1','Activo','Inactivo')), b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_tbc_payment_methods_types_after_update",
+      "timing": "AFTER",
+      "event": "UPDATE",
+      "table": "tbc_payment_methods_types",
+      "definition": "CREATE TRIGGER `trg_tbc_payment_methods_types_after_update` AFTER UPDATE ON `tbc_payment_methods_types` FOR EACH ROW BEGIN\r\n    INSERT INTO `tb_logs`\r\n        (`table_name`, `table_operation`, `db_user`, `record_id`, `operation_date`, `table_description`, `operation_status`)\r\n    VALUES\r\n        ('tbc_payment_methods_types', 'Update', USER(),\r\n         NEW.ID,\r\n         NOW(), CONCAT('Tipo de m�todo de pago actualizado. ID=', NEW.ID, ', code: ', OLD.code, ' -> ', NEW.code, ', description modificada; status: ', IF(OLD.status=b'1','Activo','Inactivo'), ' -> ', IF(NEW.status=b'1','Activo','Inactivo')), b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_tbc_payment_methods_types_after_delete",
+      "timing": "AFTER",
+      "event": "DELETE",
+      "table": "tbc_payment_methods_types",
+      "definition": "CREATE TRIGGER `trg_tbc_payment_methods_types_after_delete` AFTER DELETE ON `tbc_payment_methods_types` FOR EACH ROW BEGIN\r\n    INSERT INTO `tb_logs`\r\n        (`table_name`, `table_operation`, `db_user`, `record_id`, `operation_date`, `table_description`, `operation_status`)\r\n    VALUES\r\n        ('tbc_payment_methods_types', 'Delete', USER(),\r\n         OLD.ID,\r\n         NOW(), CONCAT('Tipo de m�todo de pago eliminado. ID=', OLD.ID, ', code=', OLD.code, ', description=', OLD.description, ', status=', IF(OLD.status=b'1','Activo','Inactivo')), b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_address_components_after_insert",
+      "timing": "AFTER",
+      "event": "INSERT",
+      "table": "tbd_address_components",
+      "definition": "CREATE TRIGGER `trg_address_components_after_insert` AFTER INSERT ON `tbd_address_components` FOR EACH ROW BEGIN\r\n    INSERT INTO `tb_logs`\r\n        (`table_name`, `table_operation`, `db_user`, `record_id`,\r\n         `operation_date`, `table_description`, `operation_status`)\r\n    VALUES\r\n        ('tbd_address_components', 'Create', USER(),\r\n         IF(NEW.ID <= 4294967295, NEW.ID, NULL),\r\n         CURRENT_TIMESTAMP,\r\n         CONCAT(\r\n             'Componente de direccion creado. ID=', NEW.ID,\r\n             ', address_ID=', NEW.address_ID,\r\n             ', value=', NEW.value,\r\n             ', component_type=', NEW.component_type,\r\n             ', status=', IF(NEW.status = b'1', 'Activo', 'Inactivo'),\r\n             ', address_sup_ID=', COALESCE(CAST(NEW.address_sup_ID AS CHAR), 'NULL'),\r\n             ', creation_date=', NEW.creation_date\r\n         ),\r\n         b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_address_components_after_update",
+      "timing": "AFTER",
+      "event": "UPDATE",
+      "table": "tbd_address_components",
+      "definition": "CREATE TRIGGER `trg_address_components_after_update` AFTER UPDATE ON `tbd_address_components` FOR EACH ROW BEGIN\r\n    INSERT INTO `tb_logs`\r\n        (`table_name`, `table_operation`, `db_user`, `record_id`,\r\n         `operation_date`, `table_description`, `operation_status`)\r\n    VALUES\r\n        ('tbd_address_components', 'Update', USER(),\r\n         IF(NEW.ID <= 4294967295, NEW.ID, NULL),\r\n         CURRENT_TIMESTAMP,\r\n         CONCAT(\r\n             'Componente de direccion actualizado. ID=', NEW.ID,\r\n             ', address_ID: ', OLD.address_ID, ' -> ', NEW.address_ID,\r\n             ', value: ', OLD.value, ' -> ', NEW.value,\r\n             ', component_type: ', OLD.component_type, ' -> ', NEW.component_type,\r\n             ', status: ', IF(OLD.status = b'1', 'Activo', 'Inactivo'),\r\n             ' -> ', IF(NEW.status = b'1', 'Activo', 'Inactivo'),\r\n             ', address_sup_ID: ', COALESCE(CAST(OLD.address_sup_ID AS CHAR), 'NULL'),\r\n             ' -> ', COALESCE(CAST(NEW.address_sup_ID AS CHAR), 'NULL')\r\n         ),\r\n         b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_address_components_after_delete",
+      "timing": "AFTER",
+      "event": "DELETE",
+      "table": "tbd_address_components",
+      "definition": "CREATE TRIGGER `trg_address_components_after_delete` AFTER DELETE ON `tbd_address_components` FOR EACH ROW BEGIN\r\n    INSERT INTO `tb_logs`\r\n        (`table_name`, `table_operation`, `db_user`, `record_id`,\r\n         `operation_date`, `table_description`, `operation_status`)\r\n    VALUES\r\n        ('tbd_address_components', 'Delete', USER(),\r\n         IF(OLD.ID <= 4294967295, OLD.ID, NULL),\r\n         CURRENT_TIMESTAMP,\r\n         CONCAT(\r\n             'Componente de direccion eliminado. ID=', OLD.ID,\r\n             ', address_ID=', OLD.address_ID,\r\n             ', value=', OLD.value,\r\n             ', component_type=', OLD.component_type,\r\n             ', status=', IF(OLD.status = b'1', 'Activo', 'Inactivo'),\r\n             ', address_sup_ID=', COALESCE(CAST(OLD.address_sup_ID AS CHAR), 'NULL'),\r\n             ', creation_date=', OLD.creation_date\r\n         ),\r\n         b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_cancellation_items_ai",
+      "timing": "AFTER",
+      "event": "INSERT",
+      "table": "tbd_cancellation_items",
+      "definition": "CREATE TRIGGER `trg_cancellation_items_ai` AFTER INSERT ON `tbd_cancellation_items` FOR EACH ROW BEGIN\r\n  INSERT INTO tb_logs\r\n    (table_name,table_operation,db_user,table_description,\r\n     operation_date, operation_status)\r\n  VALUES\r\n    ('tbd_cancellation_items', 'Create', USER(),\r\n     CONCAT('Articulo de cancelacion creado. ID=', NEW.ID,\r\n       ', cancelacion=', NEW.cancellation_ID,\r\n       ', articulo de pedido=', NEW.order_item_ID,\r\n       ', cantidad=', NEW.quantity,\r\n       ', importe unitario=', NEW.unit_amount),\r\n     NOW(), b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_cancellation_items_au",
+      "timing": "AFTER",
+      "event": "UPDATE",
+      "table": "tbd_cancellation_items",
+      "definition": "CREATE TRIGGER `trg_cancellation_items_au` AFTER UPDATE ON `tbd_cancellation_items` FOR EACH ROW BEGIN\r\n  INSERT INTO tb_logs\r\n    (table_name,table_operation,db_user,table_description,\r\n     operation_date, operation_status)\r\n  VALUES\r\n    ('tbd_cancellation_items', 'Update', USER(),\r\n     CONCAT('Articulo de cancelacion ID=', NEW.ID,\r\n       ', cancelacion=', NEW.cancellation_ID,\r\n       ', cantidad: ', OLD.quantity, ' -> ', NEW.quantity,\r\n       ', importe unitario: ', OLD.unit_amount, ' -> ',\r\n       NEW.unit_amount),\r\n     NOW(), b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_cancellation_items_ad",
+      "timing": "AFTER",
+      "event": "DELETE",
+      "table": "tbd_cancellation_items",
+      "definition": "CREATE TRIGGER `trg_cancellation_items_ad` AFTER DELETE ON `tbd_cancellation_items` FOR EACH ROW BEGIN\r\n  INSERT INTO tb_logs\r\n    (table_name,table_operation,db_user,table_description,\r\n     operation_date, operation_status)\r\n  VALUES\r\n    ('tbd_cancellation_items', 'Delete', USER(),\r\n     CONCAT('Articulo de cancelacion eliminado. ID=', OLD.ID,\r\n       ', cancelacion=', OLD.cancellation_ID,\r\n       ', articulo de pedido=', OLD.order_item_ID,\r\n       ', cantidad=', OLD.quantity),\r\n     NOW(), b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_tbd_carts_items_after_insert",
+      "timing": "AFTER",
+      "event": "INSERT",
+      "table": "tbd_carts_items",
+      "definition": "CREATE TRIGGER `trg_tbd_carts_items_after_insert` AFTER INSERT ON `tbd_carts_items` FOR EACH ROW BEGIN\r\n    INSERT INTO `tb_logs`\r\n        (`table_name`, `table_operation`, `db_user`, `record_id`, `operation_date`, `table_description`, `operation_status`)\r\n    VALUES\r\n        ('tbd_carts_items', 'Create', USER(),\r\n         NEW.cart_ID,\r\n         NOW(), CONCAT('Producto agregado al carrito. cart_ID=', NEW.cart_ID, ', provider_ID=', NEW.provider_ID, ', product_ID=', NEW.product_ID, ', quantity=', NEW.quantity), b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_tbd_carts_items_after_update",
+      "timing": "AFTER",
+      "event": "UPDATE",
+      "table": "tbd_carts_items",
+      "definition": "CREATE TRIGGER `trg_tbd_carts_items_after_update` AFTER UPDATE ON `tbd_carts_items` FOR EACH ROW BEGIN\r\n    INSERT INTO `tb_logs`\r\n        (`table_name`, `table_operation`, `db_user`, `record_id`, `operation_date`, `table_description`, `operation_status`)\r\n    VALUES\r\n        ('tbd_carts_items', 'Update', USER(),\r\n         NEW.cart_ID,\r\n         NOW(), CONCAT('Producto del carrito actualizado. Clave=(cart_ID=', NEW.cart_ID, ', provider_ID=', NEW.provider_ID, ', product_ID=', NEW.product_ID, '), quantity: ', OLD.quantity, ' -> ', NEW.quantity), b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_tbd_carts_items_after_delete",
+      "timing": "AFTER",
+      "event": "DELETE",
+      "table": "tbd_carts_items",
+      "definition": "CREATE TRIGGER `trg_tbd_carts_items_after_delete` AFTER DELETE ON `tbd_carts_items` FOR EACH ROW BEGIN\r\n    INSERT INTO `tb_logs`\r\n        (`table_name`, `table_operation`, `db_user`, `record_id`, `operation_date`, `table_description`, `operation_status`)\r\n    VALUES\r\n        ('tbd_carts_items', 'Delete', USER(),\r\n         OLD.cart_ID,\r\n         NOW(), CONCAT('Producto eliminado del carrito. cart_ID=', OLD.cart_ID, ', provider_ID=', OLD.provider_ID, ', product_ID=', OLD.product_ID, ', quantity=', OLD.quantity), b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_tbd_order_items_after_insert",
+      "timing": "AFTER",
+      "event": "INSERT",
+      "table": "tbd_order_items",
+      "definition": "CREATE TRIGGER `trg_tbd_order_items_after_insert` AFTER INSERT ON `tbd_order_items` FOR EACH ROW BEGIN\r\n    INSERT INTO `tb_logs`\r\n        (`table_name`, `table_operation`, `db_user`, `record_id`, `operation_date`, `table_description`, `operation_status`)\r\n    VALUES\r\n        ('tbd_order_items', 'Create', USER(),\r\n         NEW.ID,\r\n         NOW(), CONCAT('Art�culo de pedido creado. ID=', NEW.ID, ', seller_order_ID=', NEW.seller_order_ID, ', product_ID=', NEW.product_ID, ', provider_ID=', NEW.provider_ID, ', product_name=', NEW.product_name, ', quantity=', NEW.quantity, ', unit_price=', NEW.unit_price, ', subtotal=', NEW.subtotal), b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_tbd_order_items_after_update",
+      "timing": "AFTER",
+      "event": "UPDATE",
+      "table": "tbd_order_items",
+      "definition": "CREATE TRIGGER `trg_tbd_order_items_after_update` AFTER UPDATE ON `tbd_order_items` FOR EACH ROW BEGIN\r\n    INSERT INTO `tb_logs`\r\n        (`table_name`, `table_operation`, `db_user`, `record_id`, `operation_date`, `table_description`, `operation_status`)\r\n    VALUES\r\n        ('tbd_order_items', 'Update', USER(),\r\n         NEW.ID,\r\n         NOW(), CONCAT('Art�culo de pedido actualizado. ID=', NEW.ID, ', seller_order_ID: ', OLD.seller_order_ID, ' -> ', NEW.seller_order_ID, ', product_ID: ', OLD.product_ID, ' -> ', NEW.product_ID, ', provider_ID: ', OLD.provider_ID, ' -> ', NEW.provider_ID, ', product_name: ', OLD.product_name, ' -> ', NEW.product_name, ', quantity: ', OLD.quantity, ' -> ', NEW.quantity, ', unit_price: ', OLD.unit_price, ' -> ', NEW.unit_price, ', subtotal: ', OLD.subtotal, ' -> ', NEW.subtotal), b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_tbd_order_items_after_delete",
+      "timing": "AFTER",
+      "event": "DELETE",
+      "table": "tbd_order_items",
+      "definition": "CREATE TRIGGER `trg_tbd_order_items_after_delete` AFTER DELETE ON `tbd_order_items` FOR EACH ROW BEGIN\r\n    INSERT INTO `tb_logs`\r\n        (`table_name`, `table_operation`, `db_user`, `record_id`, `operation_date`, `table_description`, `operation_status`)\r\n    VALUES\r\n        ('tbd_order_items', 'Delete', USER(),\r\n         OLD.ID,\r\n         NOW(), CONCAT('Art�culo de pedido eliminado. ID=', OLD.ID, ', seller_order_ID=', OLD.seller_order_ID, ', product_ID=', OLD.product_ID, ', provider_ID=', OLD.provider_ID, ', product_name=', OLD.product_name, ', quantity=', OLD.quantity, ', unit_price=', OLD.unit_price, ', subtotal=', OLD.subtotal), b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_products_categories_insert",
+      "timing": "AFTER",
+      "event": "INSERT",
+      "table": "tbd_products_categories",
+      "definition": "CREATE TRIGGER `trg_products_categories_insert` AFTER INSERT ON `tbd_products_categories` FOR EACH ROW BEGIN\r\n    INSERT INTO tb_logs (\r\n        table_name,\r\n        table_operation,\r\n        db_user,\r\n        record_id,\r\n        operation_date,\r\n        table_description,\r\n        operation_status\r\n    )\r\n    VALUES (\r\n        'tbd_products_categories',\r\n        'Create',\r\n        CURRENT_USER(),\r\n        NEW.product_Id,\r\n        NOW(),\r\n        CONCAT(\r\n            'Se creó la relación producto: ',\r\n            NEW.product_Id,\r\n            ' con categoría: ',\r\n            NEW.category_Id,\r\n            '. Status: ',\r\n            IF(NEW.status = b'1', 'Activo', 'Inactivo')\r\n        ),\r\n        b'1'\r\n    );\r\nEND ;"
+    },
+    {
+      "name": "trg_products_categories_update",
+      "timing": "AFTER",
+      "event": "UPDATE",
+      "table": "tbd_products_categories",
+      "definition": "CREATE TRIGGER `trg_products_categories_update` AFTER UPDATE ON `tbd_products_categories` FOR EACH ROW BEGIN\r\n    INSERT INTO tb_logs (\r\n        table_name,\r\n        table_operation,\r\n        db_user,\r\n        record_id,\r\n        operation_date,\r\n        table_description,\r\n        operation_status\r\n    )\r\n    VALUES (\r\n        'tbd_products_categories',\r\n        'Update',\r\n        CURRENT_USER(),\r\n        NEW.product_Id,\r\n        NOW(),\r\n        CONCAT(\r\n            'Se actualizó la relación producto: ',\r\n            NEW.product_Id,\r\n            ' / categoría: ',\r\n            NEW.category_Id,\r\n            '. Status anterior: ',\r\n            IF(OLD.status = b'1', 'Activo', 'Inactivo'),\r\n            '. Status nuevo: ',\r\n            IF(NEW.status = b'1', 'Activo', 'Inactivo')\r\n        ),\r\n        b'1'\r\n    );\r\nEND ;"
+    },
+    {
+      "name": "trg_products_categories_delete",
+      "timing": "AFTER",
+      "event": "DELETE",
+      "table": "tbd_products_categories",
+      "definition": "CREATE TRIGGER `trg_products_categories_delete` AFTER DELETE ON `tbd_products_categories` FOR EACH ROW BEGIN\r\n    INSERT INTO tb_logs (\r\n        table_name,\r\n        table_operation,\r\n        db_user,\r\n        record_id,\r\n        operation_date,\r\n        table_description,\r\n        operation_status\r\n    )\r\n    VALUES (\r\n        'tbd_products_categories',\r\n        'Delete',\r\n        CURRENT_USER(),\r\n        OLD.product_Id,\r\n        NOW(),\r\n        CONCAT(\r\n            'Se eliminó la relación producto: ',\r\n            OLD.product_Id,\r\n            ' con categoría: ',\r\n            OLD.category_Id,\r\n            '. Status anterior: ',\r\n            IF(OLD.status = b'1', 'Activo', 'Inactivo')\r\n        ),\r\n        b'1'\r\n    );\r\nEND ;"
+    },
+    {
+      "name": "trg_products_users_after_insert",
+      "timing": "AFTER",
+      "event": "INSERT",
+      "table": "tbd_products_users",
+      "definition": "CREATE TRIGGER `trg_products_users_after_insert` AFTER INSERT ON `tbd_products_users` FOR EACH ROW BEGIN\r\n    INSERT INTO `tb_logs`\r\n        (`table_name`, `table_operation`, `db_user`, `record_id`,\r\n         `operation_date`, `table_description`, `operation_status`)\r\n    VALUES\r\n        ('tbd_products_users', 'Create', USER(), NEW.product_ID, NOW(),\r\n         CONCAT('Relación usuario-producto creada. user_ID=', NEW.user_ID,\r\n                ', product_ID=', NEW.product_ID,\r\n                ', type_ownership=', NEW.type_ownership,\r\n                ', status=', IF(NEW.status = b'1', 'Activo', 'Inactivo'),\r\n                ', avalaible_date=', NEW.avalaible_date),\r\n         b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_products_users_after_update",
+      "timing": "AFTER",
+      "event": "UPDATE",
+      "table": "tbd_products_users",
+      "definition": "CREATE TRIGGER `trg_products_users_after_update` AFTER UPDATE ON `tbd_products_users` FOR EACH ROW BEGIN\r\n    INSERT INTO `tb_logs`\r\n        (`table_name`, `table_operation`, `db_user`, `record_id`,\r\n         `operation_date`, `table_description`, `operation_status`)\r\n    VALUES\r\n        ('tbd_products_users', 'Update', USER(), NEW.product_ID, NOW(),\r\n         CONCAT('Relación usuario-producto actualizada. user_ID=', NEW.user_ID,\r\n                ', product_ID=', NEW.product_ID,\r\n                ', type_ownership: ', OLD.type_ownership, ' -> ', NEW.type_ownership,\r\n                ', status: ', IF(OLD.status = b'1', 'Activo', 'Inactivo'),\r\n                ' -> ', IF(NEW.status = b'1', 'Activo', 'Inactivo'),\r\n                ', avalaible_date: ', OLD.avalaible_date, ' -> ', NEW.avalaible_date),\r\n         b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_products_users_after_delete",
+      "timing": "AFTER",
+      "event": "DELETE",
+      "table": "tbd_products_users",
+      "definition": "CREATE TRIGGER `trg_products_users_after_delete` AFTER DELETE ON `tbd_products_users` FOR EACH ROW BEGIN\r\n    INSERT INTO `tb_logs`\r\n        (`table_name`, `table_operation`, `db_user`, `record_id`,\r\n         `operation_date`, `table_description`, `operation_status`)\r\n    VALUES\r\n        ('tbd_products_users', 'Delete', USER(), OLD.product_ID, NOW(),\r\n         CONCAT('Relación usuario-producto eliminada. user_ID=', OLD.user_ID,\r\n                ', product_ID=', OLD.product_ID,\r\n                ', type_ownership=', OLD.type_ownership,\r\n                ', status=', IF(OLD.status = b'1', 'Activo', 'Inactivo'),\r\n                ', avalaible_date=', OLD.avalaible_date),\r\n         b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_tbd_products_users_providers_after_insert",
+      "timing": "AFTER",
+      "event": "INSERT",
+      "table": "tbd_products_users_providers",
+      "definition": "CREATE TRIGGER `trg_tbd_products_users_providers_after_insert` AFTER INSERT ON `tbd_products_users_providers` FOR EACH ROW BEGIN\r\n    INSERT INTO `db_test`.`tb_logs` (\r\n        `table_name`,\r\n        `table_operation`,\r\n        `db_user`,\r\n        `table_description`\r\n    ) VALUES (\r\n        'tbd_products_users_providers',\r\n        'Create',\r\n        USER(),\r\n        CONCAT(\r\n            'Se asignó producto. User_ID=', NEW.user_ID, \r\n            ', Product_ID=', NEW.product_ID, \r\n            ', Tipo=', COALESCE(NEW.type_ownership, 'N/A'), \r\n            ', Estado=', NEW.status, \r\n            ', Fecha_Disponible=', NEW.avalaible_date\r\n        )\r\n    );\r\nEND ;"
+    },
+    {
+      "name": "trg_tbd_products_users_providers_after_update",
+      "timing": "AFTER",
+      "event": "UPDATE",
+      "table": "tbd_products_users_providers",
+      "definition": "CREATE TRIGGER `trg_tbd_products_users_providers_after_update` AFTER UPDATE ON `tbd_products_users_providers` FOR EACH ROW BEGIN\r\n    INSERT INTO `db_test`.`tb_logs` (\r\n        `table_name`,\r\n        `table_operation`,\r\n        `db_user`,\r\n        `table_description`\r\n    ) VALUES (\r\n        'tbd_products_users_providers',\r\n        'Update',\r\n        USER(),\r\n        CONCAT(\r\n            'Se actualizó asignación User_ID=', OLD.user_ID, ' - Product_ID=', OLD.product_ID, '. Cambios: ',\r\n            'Tipo: [', COALESCE(OLD.type_ownership, 'N/A'), ' -> ', COALESCE(NEW.type_ownership, 'N/A'), '], ',\r\n            'Estado: [', OLD.status, ' -> ', NEW.status, '], ',\r\n            'Fecha_Disponible: [', OLD.avalaible_date, ' -> ', NEW.avalaible_date, ']'\r\n        )\r\n    );\r\nEND ;"
+    },
+    {
+      "name": "trg_tbd_products_users_providers_after_delete",
+      "timing": "AFTER",
+      "event": "DELETE",
+      "table": "tbd_products_users_providers",
+      "definition": "CREATE TRIGGER `trg_tbd_products_users_providers_after_delete` AFTER DELETE ON `tbd_products_users_providers` FOR EACH ROW BEGIN\r\n    INSERT INTO `db_test`.`tb_logs` (\r\n        `table_name`,\r\n        `table_operation`,\r\n        `db_user`,\r\n        `table_description`\r\n    ) VALUES (\r\n        'tbd_products_users_providers',\r\n        'Delete',\r\n        USER(),\r\n        CONCAT(\r\n            'Se eliminó asignación entre User_ID=', OLD.user_ID, \r\n            ' y Product_ID=', OLD.product_ID, \r\n            ', Tipo=', COALESCE(OLD.type_ownership, 'N/A')\r\n        )\r\n    );\r\nEND ;"
+    },
+    {
+      "name": "trg_return_items_ai",
+      "timing": "AFTER",
+      "event": "INSERT",
+      "table": "tbd_return_items",
+      "definition": "CREATE TRIGGER `trg_return_items_ai` AFTER INSERT ON `tbd_return_items` FOR EACH ROW BEGIN\r\n  INSERT INTO tb_logs\r\n    (table_name,table_operation,db_user,table_description,\r\n     operation_date, operation_status)\r\n  VALUES\r\n    ('tbd_return_items', 'Create', USER(),\r\n     CONCAT('Articulo de devolucion creado. ID=', NEW.ID,\r\n       ', devolucion=', NEW.return_ID,\r\n       ', articulo de pedido=', NEW.order_item_ID,\r\n       ', cantidad=', NEW.quantity,\r\n       ', importe unitario=', NEW.unit_amount,\r\n       ', condicion=', NEW.item_condition),\r\n     NOW(), b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_return_items_au",
+      "timing": "AFTER",
+      "event": "UPDATE",
+      "table": "tbd_return_items",
+      "definition": "CREATE TRIGGER `trg_return_items_au` AFTER UPDATE ON `tbd_return_items` FOR EACH ROW BEGIN\r\n  INSERT INTO tb_logs\r\n    (table_name,table_operation,db_user,table_description,\r\n     operation_date, operation_status)\r\n  VALUES\r\n    ('tbd_return_items', 'Update', USER(),\r\n     CONCAT('Articulo de devolucion ID=', NEW.ID,\r\n       ', devolucion=', NEW.return_ID,\r\n       ', cantidad: ', OLD.quantity, ' -> ', NEW.quantity,\r\n       ', importe unitario: ', OLD.unit_amount, ' -> ',\r\n       NEW.unit_amount,\r\n       ', condicion: ', OLD.item_condition, ' -> ',\r\n       NEW.item_condition),\r\n     NOW(), b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_return_items_ad",
+      "timing": "AFTER",
+      "event": "DELETE",
+      "table": "tbd_return_items",
+      "definition": "CREATE TRIGGER `trg_return_items_ad` AFTER DELETE ON `tbd_return_items` FOR EACH ROW BEGIN\r\n  INSERT INTO tb_logs\r\n    (table_name,table_operation,db_user,table_description,\r\n     operation_date, operation_status)\r\n  VALUES\r\n    ('tbd_return_items', 'Delete', USER(),\r\n     CONCAT('Articulo de devolucion eliminado. ID=', OLD.ID,\r\n       ', devolucion=', OLD.return_ID,\r\n       ', articulo de pedido=', OLD.order_item_ID,\r\n       ', cantidad=', OLD.quantity,\r\n       ', condicion=', OLD.item_condition),\r\n     NOW(), b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_tbd_user_payment_methods_after_insert",
+      "timing": "AFTER",
+      "event": "INSERT",
+      "table": "tbd_user_payment_methods",
+      "definition": "CREATE TRIGGER `trg_tbd_user_payment_methods_after_insert` AFTER INSERT ON `tbd_user_payment_methods` FOR EACH ROW BEGIN\r\n    INSERT INTO `tb_logs`\r\n        (`table_name`, `table_operation`, `db_user`, `record_id`, `operation_date`, `table_description`, `operation_status`)\r\n    VALUES\r\n        ('tbd_user_payment_methods', 'Create', USER(),\r\n         NEW.ID,\r\n         NOW(), CONCAT('M�todo de pago de usuario creado. ID=', NEW.ID, ', user_ID=', NEW.user_ID, ', payment_method_type_ID=', NEW.payment_method_type_ID, ', provider=', NEW.provider, ', label=', COALESCE(NEW.label,'NULL'), ', last_four=', COALESCE(NEW.last_four,'NULL'), ', is_default=', NEW.is_default, ', status=', IF(NEW.status=b'1','Activo','Inactivo')), b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_tbd_user_payment_methods_after_update",
+      "timing": "AFTER",
+      "event": "UPDATE",
+      "table": "tbd_user_payment_methods",
+      "definition": "CREATE TRIGGER `trg_tbd_user_payment_methods_after_update` AFTER UPDATE ON `tbd_user_payment_methods` FOR EACH ROW BEGIN\r\n    INSERT INTO `tb_logs`\r\n        (`table_name`, `table_operation`, `db_user`, `record_id`, `operation_date`, `table_description`, `operation_status`)\r\n    VALUES\r\n        ('tbd_user_payment_methods', 'Update', USER(),\r\n         NEW.ID,\r\n         NOW(), CONCAT('M�todo de pago de usuario actualizado. ID=', NEW.ID, ', user_ID: ', OLD.user_ID, ' -> ', NEW.user_ID, ', payment_method_type_ID: ', OLD.payment_method_type_ID, ' -> ', NEW.payment_method_type_ID, ', provider: ', OLD.provider, ' -> ', NEW.provider, ', label: ', COALESCE(OLD.label,'NULL'), ' -> ', COALESCE(NEW.label,'NULL'), ', last_four: ', COALESCE(OLD.last_four,'NULL'), ' -> ', COALESCE(NEW.last_four,'NULL'), ', is_default: ', OLD.is_default, ' -> ', NEW.is_default, ', status: ', IF(OLD.status=b'1','Activo','Inactivo'), ' -> ', IF(NEW.status=b'1','Activo','Inactivo')), b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_tbd_user_payment_methods_after_delete",
+      "timing": "AFTER",
+      "event": "DELETE",
+      "table": "tbd_user_payment_methods",
+      "definition": "CREATE TRIGGER `trg_tbd_user_payment_methods_after_delete` AFTER DELETE ON `tbd_user_payment_methods` FOR EACH ROW BEGIN\r\n    INSERT INTO `tb_logs`\r\n        (`table_name`, `table_operation`, `db_user`, `record_id`, `operation_date`, `table_description`, `operation_status`)\r\n    VALUES\r\n        ('tbd_user_payment_methods', 'Delete', USER(),\r\n         OLD.ID,\r\n         NOW(), CONCAT('M�todo de pago de usuario eliminado. ID=', OLD.ID, ', user_ID=', OLD.user_ID, ', payment_method_type_ID=', OLD.payment_method_type_ID, ', provider=', OLD.provider, ', label=', COALESCE(OLD.label,'NULL'), ', last_four=', COALESCE(OLD.last_four,'NULL'), ', is_default=', OLD.is_default, ', status=', IF(OLD.status=b'1','Activo','Inactivo')), b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_wishlist_after_insert",
+      "timing": "AFTER",
+      "event": "INSERT",
+      "table": "tbd_users_wishlist_products",
+      "definition": "CREATE TRIGGER `trg_wishlist_after_insert` AFTER INSERT ON `tbd_users_wishlist_products` FOR EACH ROW BEGIN\r\n    INSERT INTO `tb_logs`\r\n        (`table_name`, `table_operation`, `db_user`, `record_id`,\r\n         `operation_date`, `table_description`, `operation_status`)\r\n    VALUES\r\n        ('tbd_users_wishlist_products', 'Create', USER(), NEW.product_ID, NOW(),\r\n         CONCAT('Producto agregado a lista de deseos. user_ID=', NEW.user_ID,\r\n                ', product_ID=', NEW.product_ID,\r\n                ', status=', IF(NEW.status = b'1', 'Activo', 'Inactivo'),\r\n                ', creation_date=', NEW.creation_date),\r\n         b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_wishlist_after_update",
+      "timing": "AFTER",
+      "event": "UPDATE",
+      "table": "tbd_users_wishlist_products",
+      "definition": "CREATE TRIGGER `trg_wishlist_after_update` AFTER UPDATE ON `tbd_users_wishlist_products` FOR EACH ROW BEGIN\r\n    INSERT INTO `tb_logs`\r\n        (`table_name`, `table_operation`, `db_user`, `record_id`,\r\n         `operation_date`, `table_description`, `operation_status`)\r\n    VALUES\r\n        ('tbd_users_wishlist_products', 'Update', USER(), NEW.product_ID, NOW(),\r\n         CONCAT('Registro de lista de deseos actualizado. user_ID=', NEW.user_ID,\r\n                ', product_ID=', NEW.product_ID,\r\n                ', status: ', IF(OLD.status = b'1', 'Activo', 'Inactivo'),\r\n                ' -> ', IF(NEW.status = b'1', 'Activo', 'Inactivo'),\r\n                ', last_update: ', COALESCE(CAST(OLD.last_update AS CHAR), 'NULL'),\r\n                ' -> ', COALESCE(CAST(NEW.last_update AS CHAR), 'NULL')),\r\n         b'1');\r\nEND ;"
+    },
+    {
+      "name": "trg_wishlist_after_delete",
+      "timing": "AFTER",
+      "event": "DELETE",
+      "table": "tbd_users_wishlist_products",
+      "definition": "CREATE TRIGGER `trg_wishlist_after_delete` AFTER DELETE ON `tbd_users_wishlist_products` FOR EACH ROW BEGIN\r\n    INSERT INTO `tb_logs`\r\n        (`table_name`, `table_operation`, `db_user`, `record_id`,\r\n         `operation_date`, `table_description`, `operation_status`)\r\n    VALUES\r\n        ('tbd_users_wishlist_products', 'Delete', USER(), OLD.product_ID, NOW(),\r\n         CONCAT('Producto eliminado de lista de deseos. user_ID=', OLD.user_ID,\r\n                ', product_ID=', OLD.product_ID,\r\n                ', status=', IF(OLD.status = b'1', 'Activo', 'Inactivo'),\r\n                ', creation_date=', OLD.creation_date),\r\n         b'1');\r\nEND ;"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "idx_tb_buyer_orders_seller_ID",
+      "columns": [
+        "seller_ID"
+      ],
+      "unique": false,
+      "definition": "KEY `idx_tb_buyer_orders_seller_ID` (`seller_ID`)",
+      "table": "tb_buyer_orders"
+    },
+    {
+      "name": "idx_cancellation_order",
+      "columns": [
+        "buyer_order_ID"
+      ],
+      "unique": false,
+      "definition": "KEY `idx_cancellation_order` (`buyer_order_ID`)",
+      "table": "tb_cancellations"
+    },
+    {
+      "name": "idx_cancellation_user",
+      "columns": [
+        "user_ID"
+      ],
+      "unique": false,
+      "definition": "KEY `idx_cancellation_user` (`user_ID`)",
+      "table": "tb_cancellations"
+    },
+    {
+      "name": "idx_logs_trazabilidad",
+      "columns": [
+        "table_name",
+        "table_operation",
+        "record_id",
+        "operation_date"
+      ],
+      "unique": false,
+      "definition": "KEY `idx_logs_trazabilidad` (`table_name`,`table_operation`,`record_id`,`operation_date`)",
+      "table": "tb_logs"
+    },
+    {
+      "name": "idx_payment_methods_order",
+      "columns": [
+        "order_ID"
+      ],
+      "unique": false,
+      "definition": "KEY `idx_payment_methods_order` (`order_ID`)",
+      "table": "tb_payment_methods"
+    },
+    {
+      "name": "idx_payment_methods_user",
+      "columns": [
+        "user_ID"
+      ],
+      "unique": false,
+      "definition": "KEY `idx_payment_methods_user` (`user_ID`)",
+      "table": "tb_payment_methods"
+    },
+    {
+      "name": "idx_payment_methods_type",
+      "columns": [
+        "payment_method_type_ID"
+      ],
+      "unique": false,
+      "definition": "KEY `idx_payment_methods_type` (`payment_method_type_ID`)",
+      "table": "tb_payment_methods"
+    },
+    {
+      "name": "fk_transactions_payments",
+      "columns": [
+        "payment_ID"
+      ],
+      "unique": false,
+      "definition": "KEY `fk_transactions_payments` (`payment_ID`)",
+      "table": "tb_payment_transactions"
+    },
+    {
+      "name": "fk_payments_buyer_orders",
+      "columns": [
+        "order_ID"
+      ],
+      "unique": false,
+      "definition": "KEY `fk_payments_buyer_orders` (`order_ID`)",
+      "table": "tb_payments"
+    },
+    {
+      "name": "idx_refund_payment",
+      "columns": [
+        "payment_ID"
+      ],
+      "unique": false,
+      "definition": "KEY `idx_refund_payment` (`payment_ID`)",
+      "table": "tb_refunds"
+    },
+    {
+      "name": "idx_refund_cancellation",
+      "columns": [
+        "cancellation_ID"
+      ],
+      "unique": false,
+      "definition": "KEY `idx_refund_cancellation` (`cancellation_ID`)",
+      "table": "tb_refunds"
+    },
+    {
+      "name": "idx_refund_return",
+      "columns": [
+        "return_ID"
+      ],
+      "unique": false,
+      "definition": "KEY `idx_refund_return` (`return_ID`)",
+      "table": "tb_refunds"
+    },
+    {
+      "name": "idx_return_order",
+      "columns": [
+        "buyer_order_ID"
+      ],
+      "unique": false,
+      "definition": "KEY `idx_return_order` (`buyer_order_ID`)",
+      "table": "tb_returns"
+    },
+    {
+      "name": "idx_return_item",
+      "columns": [
+        "order_item_ID"
+      ],
+      "unique": false,
+      "definition": "KEY `idx_return_item` (`order_item_ID`)",
+      "table": "tb_returns"
+    },
+    {
+      "name": "idx_return_user",
+      "columns": [
+        "user_ID"
+      ],
+      "unique": false,
+      "definition": "KEY `idx_return_user` (`user_ID`)",
+      "table": "tb_returns"
+    },
+    {
+      "name": "idx_shipment_order",
+      "columns": [
+        "buyer_order_ID"
+      ],
+      "unique": false,
+      "definition": "KEY `idx_shipment_order` (`buyer_order_ID`)",
+      "table": "tb_shipments"
+    },
+    {
+      "name": "idx_shipment_address",
+      "columns": [
+        "address_ID"
+      ],
+      "unique": false,
+      "definition": "KEY `idx_shipment_address` (`address_ID`)",
+      "table": "tb_shipments"
+    },
+    {
+      "name": "idx_user_addresses",
+      "columns": [
+        "user_ID"
+      ],
+      "unique": false,
+      "definition": "KEY `idx_user_addresses` (`user_ID`)",
+      "table": "tb_user_addresses"
+    },
+    {
+      "name": "fk_superior_category",
+      "columns": [
+        "sup_id_category"
+      ],
+      "unique": false,
+      "definition": "KEY `fk_superior_category` (`sup_id_category`)",
+      "table": "tbc_categories"
+    },
+    {
+      "name": "idx_address_parent",
+      "columns": [
+        "address_ID",
+        "address_sup_ID"
+      ],
+      "unique": false,
+      "definition": "KEY `idx_address_parent` (`address_ID`,`address_sup_ID`)",
+      "table": "tbd_address_components"
+    },
+    {
+      "name": "idx_cancellation_items_cancellation",
+      "columns": [
+        "cancellation_ID"
+      ],
+      "unique": false,
+      "definition": "KEY `idx_cancellation_items_cancellation` (`cancellation_ID`)",
+      "table": "tbd_cancellation_items"
+    },
+    {
+      "name": "idx_cancellation_items_order_item",
+      "columns": [
+        "order_item_ID"
+      ],
+      "unique": false,
+      "definition": "KEY `idx_cancellation_items_order_item` (`order_item_ID`)",
+      "table": "tbd_cancellation_items"
+    },
+    {
+      "name": "idx_carts_items_provider_product",
+      "columns": [
+        "provider_ID",
+        "product_ID"
+      ],
+      "unique": false,
+      "definition": "KEY `idx_carts_items_provider_product` (`provider_ID`,`product_ID`)",
+      "table": "tbd_carts_items"
+    },
+    {
+      "name": "idx_order_items_seller_order",
+      "columns": [
+        "seller_order_ID"
+      ],
+      "unique": false,
+      "definition": "KEY `idx_order_items_seller_order` (`seller_order_ID`)",
+      "table": "tbd_order_items"
+    },
+    {
+      "name": "idx_order_items_provider_product",
+      "columns": [
+        "provider_ID",
+        "product_ID"
+      ],
+      "unique": false,
+      "definition": "KEY `idx_order_items_provider_product` (`provider_ID`,`product_ID`)",
+      "table": "tbd_order_items"
+    },
+    {
+      "name": "fk_products_1_idx",
+      "columns": [
+        "product_Id"
+      ],
+      "unique": false,
+      "definition": "KEY `fk_products_1_idx` (`product_Id`)",
+      "table": "tbd_products_categories"
+    },
+    {
+      "name": "fk_products_users_product",
+      "columns": [
+        "product_ID"
+      ],
+      "unique": false,
+      "definition": "KEY `fk_products_users_product` (`product_ID`)",
+      "table": "tbd_products_users"
+    },
+    {
+      "name": "fk_products2",
+      "columns": [
+        "product_ID"
+      ],
+      "unique": false,
+      "definition": "KEY `fk_products2` (`product_ID`)",
+      "table": "tbd_products_users_providers"
+    },
+    {
+      "name": "idx_return_items_return",
+      "columns": [
+        "return_ID"
+      ],
+      "unique": false,
+      "definition": "KEY `idx_return_items_return` (`return_ID`)",
+      "table": "tbd_return_items"
+    },
+    {
+      "name": "idx_return_items_order_item",
+      "columns": [
+        "order_item_ID"
+      ],
+      "unique": false,
+      "definition": "KEY `idx_return_items_order_item` (`order_item_ID`)",
+      "table": "tbd_return_items"
+    },
+    {
+      "name": "user_ID",
+      "columns": [
+        "user_ID"
+      ],
+      "unique": false,
+      "definition": "KEY `user_ID` (`user_ID`)",
+      "table": "tbd_user_payment_methods"
+    },
+    {
+      "name": "payment_method_type_ID",
+      "columns": [
+        "payment_method_type_ID"
+      ],
+      "unique": false,
+      "definition": "KEY `payment_method_type_ID` (`payment_method_type_ID`)",
+      "table": "tbd_user_payment_methods"
+    },
+    {
+      "name": "idx_wishlist_product",
+      "columns": [
+        "product_ID"
+      ],
+      "unique": false,
+      "definition": "KEY `idx_wishlist_product` (`product_ID`)",
+      "table": "tbd_users_wishlist_products"
+    }
+  ],
+  "constraints": [
+    {
+      "name": "PRIMARY",
+      "type": "PRIMARY KEY",
+      "table": "db_users",
+      "columns": [
+        "ID"
+      ],
+      "definition": "PRIMARY KEY (`ID`)"
+    },
+    {
+      "name": "email",
+      "columns": [
+        "email"
+      ],
+      "definition": "UNIQUE KEY `email` (`email`)",
+      "type": "UNIQUE",
+      "table": "db_users"
+    },
+    {
+      "name": "nick",
+      "columns": [
+        "nick"
+      ],
+      "definition": "UNIQUE KEY `nick` (`nick`)",
+      "type": "UNIQUE",
+      "table": "db_users"
+    },
+    {
+      "name": "PRIMARY",
+      "type": "PRIMARY KEY",
+      "table": "tb_buyer_orders",
+      "columns": [
+        "ID"
+      ],
+      "definition": "PRIMARY KEY (`ID`)"
+    },
+    {
+      "name": "chk_tb_buyer_orders_shipping_cost",
+      "expression": "(`shipping_cost` >= 0)",
+      "definition": "CONSTRAINT `chk_tb_buyer_orders_shipping_cost` CHECK ((`shipping_cost` >= 0))",
+      "type": "CHECK",
+      "table": "tb_buyer_orders"
+    },
+    {
+      "name": "chk_tb_buyer_orders_subtotal",
+      "expression": "(`subtotal` >= 0)",
+      "definition": "CONSTRAINT `chk_tb_buyer_orders_subtotal` CHECK ((`subtotal` >= 0))",
+      "type": "CHECK",
+      "table": "tb_buyer_orders"
+    },
+    {
+      "name": "fk_tb_buyer_orders_db_users",
+      "columns": [
+        "seller_ID"
+      ],
+      "referencesTable": "db_users",
+      "referencesColumns": [
+        "ID"
+      ],
+      "definition": "CONSTRAINT `fk_tb_buyer_orders_db_users` FOREIGN KEY (`seller_ID`) REFERENCES `db_users` (`ID`)",
+      "onDelete": null,
+      "onUpdate": null,
+      "type": "FOREIGN KEY",
+      "table": "tb_buyer_orders"
+    },
+    {
+      "name": "PRIMARY",
+      "type": "PRIMARY KEY",
+      "table": "tb_cancellations",
+      "columns": [
+        "ID"
+      ],
+      "definition": "PRIMARY KEY (`ID`)"
+    },
+    {
+      "name": "fk_cancellations_order",
+      "columns": [
+        "buyer_order_ID"
+      ],
+      "referencesTable": "tb_buyer_orders",
+      "referencesColumns": [
+        "ID"
+      ],
+      "definition": "CONSTRAINT `fk_cancellations_order` FOREIGN KEY (`buyer_order_ID`) REFERENCES `tb_buyer_orders` (`ID`)",
+      "onDelete": null,
+      "onUpdate": null,
+      "type": "FOREIGN KEY",
+      "table": "tb_cancellations"
+    },
+    {
+      "name": "fk_cancellations_user",
+      "columns": [
+        "user_ID"
+      ],
+      "referencesTable": "db_users",
+      "referencesColumns": [
+        "ID"
+      ],
+      "definition": "CONSTRAINT `fk_cancellations_user` FOREIGN KEY (`user_ID`) REFERENCES `db_users` (`ID`)",
+      "onDelete": null,
+      "onUpdate": null,
+      "type": "FOREIGN KEY",
+      "table": "tb_cancellations"
+    },
+    {
+      "name": "PRIMARY",
+      "type": "PRIMARY KEY",
+      "table": "tb_carts",
+      "columns": [
+        "ID"
+      ],
+      "definition": "PRIMARY KEY (`ID`)"
+    },
+    {
+      "name": "fk_carts_user",
+      "columns": [
+        "user_ID"
+      ],
+      "referencesTable": "db_users",
+      "referencesColumns": [
+        "ID"
+      ],
+      "definition": "CONSTRAINT `fk_carts_user` FOREIGN KEY (`user_ID`) REFERENCES `db_users` (`ID`)",
+      "onDelete": null,
+      "onUpdate": null,
+      "type": "FOREIGN KEY",
+      "table": "tb_carts"
+    },
+    {
+      "name": "uk_cart_user",
+      "columns": [
+        "user_ID"
+      ],
+      "definition": "UNIQUE KEY `uk_cart_user` (`user_ID`)",
+      "type": "UNIQUE",
+      "table": "tb_carts"
+    },
+    {
+      "name": "PRIMARY",
+      "type": "PRIMARY KEY",
+      "table": "tb_logs",
+      "columns": [
+        "ID"
+      ],
+      "definition": "PRIMARY KEY (`ID`)"
+    },
+    {
+      "name": "PRIMARY",
+      "type": "PRIMARY KEY",
+      "table": "tb_payment_methods",
+      "columns": [
+        "ID"
+      ],
+      "definition": "PRIMARY KEY (`ID`)"
+    },
+    {
+      "name": "chk_payment_methods_amount",
+      "expression": "(`amount` > 0)",
+      "definition": "CONSTRAINT `chk_payment_methods_amount` CHECK ((`amount` > 0))",
+      "type": "CHECK",
+      "table": "tb_payment_methods"
+    },
+    {
+      "name": "fk_payment_methods_type",
+      "columns": [
+        "payment_method_type_ID"
+      ],
+      "referencesTable": "tbc_payment_methods_types",
+      "referencesColumns": [
+        "ID"
+      ],
+      "definition": "CONSTRAINT `fk_payment_methods_type` FOREIGN KEY (`payment_method_type_ID`) REFERENCES `tbc_payment_methods_types` (`ID`)",
+      "onDelete": null,
+      "onUpdate": null,
+      "type": "FOREIGN KEY",
+      "table": "tb_payment_methods"
+    },
+    {
+      "name": "fk_payment_methods_user",
+      "columns": [
+        "user_ID"
+      ],
+      "referencesTable": "db_users",
+      "referencesColumns": [
+        "ID"
+      ],
+      "definition": "CONSTRAINT `fk_payment_methods_user` FOREIGN KEY (`user_ID`) REFERENCES `db_users` (`ID`)",
+      "onDelete": null,
+      "onUpdate": null,
+      "type": "FOREIGN KEY",
+      "table": "tb_payment_methods"
+    },
+    {
+      "name": "PRIMARY",
+      "type": "PRIMARY KEY",
+      "table": "tb_payment_transactions",
+      "columns": [
+        "ID"
+      ],
+      "definition": "PRIMARY KEY (`ID`)"
+    },
+    {
+      "name": "chk_transaction_amount",
+      "expression": "(`amount` >= 0)",
+      "definition": "CONSTRAINT `chk_transaction_amount` CHECK ((`amount` >= 0))",
+      "type": "CHECK",
+      "table": "tb_payment_transactions"
+    },
+    {
+      "name": "fk_transactions_payments",
+      "columns": [
+        "payment_ID"
+      ],
+      "referencesTable": "tb_payments",
+      "referencesColumns": [
+        "ID"
+      ],
+      "definition": "CONSTRAINT `fk_transactions_payments` FOREIGN KEY (`payment_ID`) REFERENCES `tb_payments` (`ID`)",
+      "onDelete": null,
+      "onUpdate": null,
+      "type": "FOREIGN KEY",
+      "table": "tb_payment_transactions"
+    },
+    {
+      "name": "PRIMARY",
+      "type": "PRIMARY KEY",
+      "table": "tb_payments",
+      "columns": [
+        "ID"
+      ],
+      "definition": "PRIMARY KEY (`ID`)"
+    },
+    {
+      "name": "chk_payment_amount",
+      "expression": "(`amount` > 0)",
+      "definition": "CONSTRAINT `chk_payment_amount` CHECK ((`amount` > 0))",
+      "type": "CHECK",
+      "table": "tb_payments"
+    },
+    {
+      "name": "fk_payments_buyer_orders",
+      "columns": [
+        "order_ID"
+      ],
+      "referencesTable": "tb_buyer_orders",
+      "referencesColumns": [
+        "ID"
+      ],
+      "definition": "CONSTRAINT `fk_payments_buyer_orders` FOREIGN KEY (`order_ID`) REFERENCES `tb_buyer_orders` (`ID`)",
+      "onDelete": null,
+      "onUpdate": null,
+      "type": "FOREIGN KEY",
+      "table": "tb_payments"
+    },
+    {
+      "name": "uk_payment_reference",
+      "columns": [
+        "provider",
+        "provider_reference"
+      ],
+      "definition": "UNIQUE KEY `uk_payment_reference` (`provider`,`provider_reference`)",
+      "type": "UNIQUE",
+      "table": "tb_payments"
+    },
+    {
+      "name": "PRIMARY",
+      "type": "PRIMARY KEY",
+      "table": "tb_people",
+      "columns": [
+        "person_ID"
+      ],
+      "definition": "PRIMARY KEY (`person_ID`)"
+    },
+    {
+      "name": "fk_people_users",
+      "columns": [
+        "user_ID"
+      ],
+      "referencesTable": "db_users",
+      "referencesColumns": [
+        "ID"
+      ],
+      "definition": "CONSTRAINT `fk_people_users` FOREIGN KEY (`user_ID`) REFERENCES `db_users` (`ID`)",
+      "onDelete": null,
+      "onUpdate": null,
+      "type": "FOREIGN KEY",
+      "table": "tb_people"
+    },
+    {
+      "name": "uq_tb_people_user_ID",
+      "columns": [
+        "user_ID"
+      ],
+      "definition": "UNIQUE KEY `uq_tb_people_user_ID` (`user_ID`)",
+      "type": "UNIQUE",
+      "table": "tb_people"
+    },
+    {
+      "name": "PRIMARY",
+      "type": "PRIMARY KEY",
+      "table": "tb_products",
+      "columns": [
+        "ID"
+      ],
+      "definition": "PRIMARY KEY (`ID`)"
+    },
+    {
+      "name": "SKU",
+      "columns": [
+        "SKU"
+      ],
+      "definition": "UNIQUE KEY `SKU` (`SKU`)",
+      "type": "UNIQUE",
+      "table": "tb_products"
+    },
+    {
+      "name": "PRIMARY",
+      "type": "PRIMARY KEY",
+      "table": "tb_refunds",
+      "columns": [
+        "ID"
+      ],
+      "definition": "PRIMARY KEY (`ID`)"
+    },
+    {
+      "name": "chk_refund_amount",
+      "expression": "(`amount` > 0)",
+      "definition": "CONSTRAINT `chk_refund_amount` CHECK ((`amount` > 0))",
+      "type": "CHECK",
+      "table": "tb_refunds"
+    },
+    {
+      "name": "chk_refund_origin",
+      "expression": "((`cancellation_ID` is not null) or (`return_ID` is not null))",
+      "definition": "CONSTRAINT `chk_refund_origin` CHECK (((`cancellation_ID` is not null) or (`return_ID` is not null)))",
+      "type": "CHECK",
+      "table": "tb_refunds"
+    },
+    {
+      "name": "fk_refunds_cancellation",
+      "columns": [
+        "cancellation_ID"
+      ],
+      "referencesTable": "tb_cancellations",
+      "referencesColumns": [
+        "ID"
+      ],
+      "definition": "CONSTRAINT `fk_refunds_cancellation` FOREIGN KEY (`cancellation_ID`) REFERENCES `tb_cancellations` (`ID`)",
+      "onDelete": null,
+      "onUpdate": null,
+      "type": "FOREIGN KEY",
+      "table": "tb_refunds"
+    },
+    {
+      "name": "fk_refunds_payment",
+      "columns": [
+        "payment_ID"
+      ],
+      "referencesTable": "tb_payments",
+      "referencesColumns": [
+        "ID"
+      ],
+      "definition": "CONSTRAINT `fk_refunds_payment` FOREIGN KEY (`payment_ID`) REFERENCES `tb_payments` (`ID`)",
+      "onDelete": null,
+      "onUpdate": null,
+      "type": "FOREIGN KEY",
+      "table": "tb_refunds"
+    },
+    {
+      "name": "fk_refunds_return",
+      "columns": [
+        "return_ID"
+      ],
+      "referencesTable": "tb_returns",
+      "referencesColumns": [
+        "ID"
+      ],
+      "definition": "CONSTRAINT `fk_refunds_return` FOREIGN KEY (`return_ID`) REFERENCES `tb_returns` (`ID`)",
+      "onDelete": null,
+      "onUpdate": null,
+      "type": "FOREIGN KEY",
+      "table": "tb_refunds"
+    },
+    {
+      "name": "PRIMARY",
+      "type": "PRIMARY KEY",
+      "table": "tb_returns",
+      "columns": [
+        "ID"
+      ],
+      "definition": "PRIMARY KEY (`ID`)"
+    },
+    {
+      "name": "chk_return_quantity",
+      "expression": "(`quantity` > 0)",
+      "definition": "CONSTRAINT `chk_return_quantity` CHECK ((`quantity` > 0))",
+      "type": "CHECK",
+      "table": "tb_returns"
+    },
+    {
+      "name": "fk_returns_item",
+      "columns": [
+        "order_item_ID"
+      ],
+      "referencesTable": "tbd_order_items",
+      "referencesColumns": [
+        "ID"
+      ],
+      "definition": "CONSTRAINT `fk_returns_item` FOREIGN KEY (`order_item_ID`) REFERENCES `tbd_order_items` (`ID`)",
+      "onDelete": null,
+      "onUpdate": null,
+      "type": "FOREIGN KEY",
+      "table": "tb_returns"
+    },
+    {
+      "name": "fk_returns_order",
+      "columns": [
+        "buyer_order_ID"
+      ],
+      "referencesTable": "tb_buyer_orders",
+      "referencesColumns": [
+        "ID"
+      ],
+      "definition": "CONSTRAINT `fk_returns_order` FOREIGN KEY (`buyer_order_ID`) REFERENCES `tb_buyer_orders` (`ID`)",
+      "onDelete": null,
+      "onUpdate": null,
+      "type": "FOREIGN KEY",
+      "table": "tb_returns"
+    },
+    {
+      "name": "fk_returns_user",
+      "columns": [
+        "user_ID"
+      ],
+      "referencesTable": "db_users",
+      "referencesColumns": [
+        "ID"
+      ],
+      "definition": "CONSTRAINT `fk_returns_user` FOREIGN KEY (`user_ID`) REFERENCES `db_users` (`ID`)",
+      "onDelete": null,
+      "onUpdate": null,
+      "type": "FOREIGN KEY",
+      "table": "tb_returns"
+    },
+    {
+      "name": "PRIMARY",
+      "type": "PRIMARY KEY",
+      "table": "tb_shipments",
+      "columns": [
+        "ID"
+      ],
+      "definition": "PRIMARY KEY (`ID`)"
+    },
+    {
+      "name": "chk_shipment_cost",
+      "expression": "(`shipping_cost` >= 0)",
+      "definition": "CONSTRAINT `chk_shipment_cost` CHECK ((`shipping_cost` >= 0))",
+      "type": "CHECK",
+      "table": "tb_shipments"
+    },
+    {
+      "name": "fk_shipments_address",
+      "columns": [
+        "address_ID"
+      ],
+      "referencesTable": "tb_user_addresses",
+      "referencesColumns": [
+        "ID"
+      ],
+      "definition": "CONSTRAINT `fk_shipments_address` FOREIGN KEY (`address_ID`) REFERENCES `tb_user_addresses` (`ID`)",
+      "onDelete": null,
+      "onUpdate": null,
+      "type": "FOREIGN KEY",
+      "table": "tb_shipments"
+    },
+    {
+      "name": "fk_shipments_order",
+      "columns": [
+        "buyer_order_ID"
+      ],
+      "referencesTable": "tb_buyer_orders",
+      "referencesColumns": [
+        "ID"
+      ],
+      "definition": "CONSTRAINT `fk_shipments_order` FOREIGN KEY (`buyer_order_ID`) REFERENCES `tb_buyer_orders` (`ID`)",
+      "onDelete": null,
+      "onUpdate": null,
+      "type": "FOREIGN KEY",
+      "table": "tb_shipments"
+    },
+    {
+      "name": "uk_shipment_tracking",
+      "columns": [
+        "carrier",
+        "tracking_number"
+      ],
+      "definition": "UNIQUE KEY `uk_shipment_tracking` (`carrier`,`tracking_number`)",
+      "type": "UNIQUE",
+      "table": "tb_shipments"
+    },
+    {
+      "name": "PRIMARY",
+      "type": "PRIMARY KEY",
+      "table": "tb_user_addresses",
+      "columns": [
+        "ID"
+      ],
+      "definition": "PRIMARY KEY (`ID`)"
+    },
+    {
+      "name": "chk_coordinates",
+      "expression": "(((`latitude` is null) and (`longitude` is null)) or ((`latitude` is not null) and (`longitude` is not null)))",
+      "definition": "CONSTRAINT `chk_coordinates` CHECK ((((`latitude` is null) and (`longitude` is null)) or ((`latitude` is not null) and (`longitude` is not null))))",
+      "type": "CHECK",
+      "table": "tb_user_addresses"
+    },
+    {
+      "name": "chk_latitude",
+      "expression": "(`latitude` between -(90) and 90)",
+      "definition": "CONSTRAINT `chk_latitude` CHECK ((`latitude` between -(90) and 90))",
+      "type": "CHECK",
+      "table": "tb_user_addresses"
+    },
+    {
+      "name": "chk_longitude",
+      "expression": "(`longitude` between -(180) and 180)",
+      "definition": "CONSTRAINT `chk_longitude` CHECK ((`longitude` between -(180) and 180))",
+      "type": "CHECK",
+      "table": "tb_user_addresses"
+    },
+    {
+      "name": "fk_addresses_users",
+      "columns": [
+        "user_ID"
+      ],
+      "referencesTable": "db_users",
+      "referencesColumns": [
+        "ID"
+      ],
+      "definition": "CONSTRAINT `fk_addresses_users` FOREIGN KEY (`user_ID`) REFERENCES `db_users` (`ID`)",
+      "onDelete": null,
+      "onUpdate": null,
+      "type": "FOREIGN KEY",
+      "table": "tb_user_addresses"
+    },
+    {
+      "name": "PRIMARY",
+      "type": "PRIMARY KEY",
+      "table": "tbc_categories",
+      "columns": [
+        "ID"
+      ],
+      "definition": "PRIMARY KEY (`ID`)"
+    },
+    {
+      "name": "fk_superior_category",
+      "columns": [
+        "sup_id_category"
+      ],
+      "referencesTable": "tbc_categories",
+      "referencesColumns": [
+        "ID"
+      ],
+      "definition": "CONSTRAINT `fk_superior_category` FOREIGN KEY (`sup_id_category`) REFERENCES `tbc_categories` (`ID`)",
+      "onDelete": null,
+      "onUpdate": null,
+      "type": "FOREIGN KEY",
+      "table": "tbc_categories"
+    },
+    {
+      "name": "name",
+      "columns": [
+        "name"
+      ],
+      "definition": "UNIQUE KEY `name` (`name`)",
+      "type": "UNIQUE",
+      "table": "tbc_categories"
+    },
+    {
+      "name": "PRIMARY",
+      "type": "PRIMARY KEY",
+      "table": "tbc_payment_methods_types",
+      "columns": [
+        "ID"
+      ],
+      "definition": "PRIMARY KEY (`ID`)"
+    },
+    {
+      "name": "code_unique",
+      "columns": [
+        "code"
+      ],
+      "definition": "UNIQUE KEY `code_unique` (`code`)",
+      "type": "UNIQUE",
+      "table": "tbc_payment_methods_types"
+    },
+    {
+      "name": "PRIMARY",
+      "type": "PRIMARY KEY",
+      "table": "tbd_address_components",
+      "columns": [
+        "ID"
+      ],
+      "definition": "PRIMARY KEY (`ID`)"
+    },
+    {
+      "name": "fk_component_address",
+      "columns": [
+        "address_ID"
+      ],
+      "referencesTable": "tb_user_addresses",
+      "referencesColumns": [
+        "ID"
+      ],
+      "definition": "CONSTRAINT `fk_component_address` FOREIGN KEY (`address_ID`) REFERENCES `tb_user_addresses` (`ID`) ON DELETE RESTRICT",
+      "onDelete": "RESTRICT",
+      "onUpdate": null,
+      "type": "FOREIGN KEY",
+      "table": "tbd_address_components"
+    },
+    {
+      "name": "fk_component_parent",
+      "columns": [
+        "address_ID",
+        "address_sup_ID"
+      ],
+      "referencesTable": "tbd_address_components",
+      "referencesColumns": [
+        "address_ID",
+        "ID"
+      ],
+      "definition": "CONSTRAINT `fk_component_parent` FOREIGN KEY (`address_ID`, `address_sup_ID`) REFERENCES `tbd_address_components` (`address_ID`, `ID`) ON DELETE RESTRICT",
+      "onDelete": "RESTRICT",
+      "onUpdate": null,
+      "type": "FOREIGN KEY",
+      "table": "tbd_address_components"
+    },
+    {
+      "name": "uk_address_component",
+      "columns": [
+        "address_ID",
+        "ID"
+      ],
+      "definition": "UNIQUE KEY `uk_address_component` (`address_ID`,`ID`)",
+      "type": "UNIQUE",
+      "table": "tbd_address_components"
+    },
+    {
+      "name": "PRIMARY",
+      "type": "PRIMARY KEY",
+      "table": "tbd_cancellation_items",
+      "columns": [
+        "ID"
+      ],
+      "definition": "PRIMARY KEY (`ID`)"
+    },
+    {
+      "name": "chk_cancellation_items_amount",
+      "expression": "(`unit_amount` >= 0)",
+      "definition": "CONSTRAINT `chk_cancellation_items_amount` CHECK ((`unit_amount` >= 0))",
+      "type": "CHECK",
+      "table": "tbd_cancellation_items"
+    },
+    {
+      "name": "chk_cancellation_items_quantity",
+      "expression": "(`quantity` > 0)",
+      "definition": "CONSTRAINT `chk_cancellation_items_quantity` CHECK ((`quantity` > 0))",
+      "type": "CHECK",
+      "table": "tbd_cancellation_items"
+    },
+    {
+      "name": "fk_cancellation_items_cancellation",
+      "columns": [
+        "cancellation_ID"
+      ],
+      "referencesTable": "tb_cancellations",
+      "referencesColumns": [
+        "ID"
+      ],
+      "definition": "CONSTRAINT `fk_cancellation_items_cancellation` FOREIGN KEY (`cancellation_ID`) REFERENCES `tb_cancellations` (`ID`)",
+      "onDelete": null,
+      "onUpdate": null,
+      "type": "FOREIGN KEY",
+      "table": "tbd_cancellation_items"
+    },
+    {
+      "name": "fk_cancellation_items_order_item",
+      "columns": [
+        "order_item_ID"
+      ],
+      "referencesTable": "tbd_order_items",
+      "referencesColumns": [
+        "ID"
+      ],
+      "definition": "CONSTRAINT `fk_cancellation_items_order_item` FOREIGN KEY (`order_item_ID`) REFERENCES `tbd_order_items` (`ID`)",
+      "onDelete": null,
+      "onUpdate": null,
+      "type": "FOREIGN KEY",
+      "table": "tbd_cancellation_items"
+    },
+    {
+      "name": "PRIMARY",
+      "type": "PRIMARY KEY",
+      "table": "tbd_carts_items",
+      "columns": [
+        "cart_ID",
+        "provider_ID",
+        "product_ID"
+      ],
+      "definition": "PRIMARY KEY (`cart_ID`,`provider_ID`,`product_ID`)"
+    },
+    {
+      "name": "chk_carts_items_quantity",
+      "expression": "(`quantity` > 0)",
+      "definition": "CONSTRAINT `chk_carts_items_quantity` CHECK ((`quantity` > 0))",
+      "type": "CHECK",
+      "table": "tbd_carts_items"
+    },
+    {
+      "name": "fk_carts_items_cart",
+      "columns": [
+        "cart_ID"
+      ],
+      "referencesTable": "tb_carts",
+      "referencesColumns": [
+        "ID"
+      ],
+      "definition": "CONSTRAINT `fk_carts_items_cart` FOREIGN KEY (`cart_ID`) REFERENCES `tb_carts` (`ID`)",
+      "onDelete": null,
+      "onUpdate": null,
+      "type": "FOREIGN KEY",
+      "table": "tbd_carts_items"
+    },
+    {
+      "name": "fk_carts_items_provider_product",
+      "columns": [
+        "provider_ID",
+        "product_ID"
+      ],
+      "referencesTable": "tbd_products_users",
+      "referencesColumns": [
+        "user_ID",
+        "product_ID"
+      ],
+      "definition": "CONSTRAINT `fk_carts_items_provider_product` FOREIGN KEY (`provider_ID`, `product_ID`) REFERENCES `tbd_products_users` (`user_ID`, `product_ID`)",
+      "onDelete": null,
+      "onUpdate": null,
+      "type": "FOREIGN KEY",
+      "table": "tbd_carts_items"
+    },
+    {
+      "name": "PRIMARY",
+      "type": "PRIMARY KEY",
+      "table": "tbd_order_items",
+      "columns": [
+        "ID"
+      ],
+      "definition": "PRIMARY KEY (`ID`)"
+    },
+    {
+      "name": "chk_order_items_quantity",
+      "expression": "(`quantity` > 0)",
+      "definition": "CONSTRAINT `chk_order_items_quantity` CHECK ((`quantity` > 0))",
+      "type": "CHECK",
+      "table": "tbd_order_items"
+    },
+    {
+      "name": "chk_order_items_unit_price",
+      "expression": "(`unit_price` >= 0)",
+      "definition": "CONSTRAINT `chk_order_items_unit_price` CHECK ((`unit_price` >= 0))",
+      "type": "CHECK",
+      "table": "tbd_order_items"
+    },
+    {
+      "name": "fk_order_items_buyer_order",
+      "columns": [
+        "seller_order_ID"
+      ],
+      "referencesTable": "tb_buyer_orders",
+      "referencesColumns": [
+        "ID"
+      ],
+      "definition": "CONSTRAINT `fk_order_items_buyer_order` FOREIGN KEY (`seller_order_ID`) REFERENCES `tb_buyer_orders` (`ID`)",
+      "onDelete": null,
+      "onUpdate": null,
+      "type": "FOREIGN KEY",
+      "table": "tbd_order_items"
+    },
+    {
+      "name": "fk_order_items_provider_product",
+      "columns": [
+        "provider_ID",
+        "product_ID"
+      ],
+      "referencesTable": "tbd_products_users",
+      "referencesColumns": [
+        "user_ID",
+        "product_ID"
+      ],
+      "definition": "CONSTRAINT `fk_order_items_provider_product` FOREIGN KEY (`provider_ID`, `product_ID`) REFERENCES `tbd_products_users` (`user_ID`, `product_ID`)",
+      "onDelete": null,
+      "onUpdate": null,
+      "type": "FOREIGN KEY",
+      "table": "tbd_order_items"
+    },
+    {
+      "name": "PRIMARY",
+      "type": "PRIMARY KEY",
+      "table": "tbd_products_categories",
+      "columns": [
+        "category_Id",
+        "product_Id"
+      ],
+      "definition": "PRIMARY KEY (`category_Id`,`product_Id`)"
+    },
+    {
+      "name": "fk_category_1",
+      "columns": [
+        "category_Id"
+      ],
+      "referencesTable": "tbc_categories",
+      "referencesColumns": [
+        "ID"
+      ],
+      "definition": "CONSTRAINT `fk_category_1` FOREIGN KEY (`category_Id`) REFERENCES `tbc_categories` (`ID`)",
+      "onDelete": null,
+      "onUpdate": null,
+      "type": "FOREIGN KEY",
+      "table": "tbd_products_categories"
+    },
+    {
+      "name": "fk_products_1",
+      "columns": [
+        "product_Id"
+      ],
+      "referencesTable": "tb_products",
+      "referencesColumns": [
+        "ID"
+      ],
+      "definition": "CONSTRAINT `fk_products_1` FOREIGN KEY (`product_Id`) REFERENCES `tb_products` (`ID`)",
+      "onDelete": null,
+      "onUpdate": null,
+      "type": "FOREIGN KEY",
+      "table": "tbd_products_categories"
+    },
+    {
+      "name": "PRIMARY",
+      "type": "PRIMARY KEY",
+      "table": "tbd_products_users",
+      "columns": [
+        "user_ID",
+        "product_ID"
+      ],
+      "definition": "PRIMARY KEY (`user_ID`,`product_ID`)"
+    },
+    {
+      "name": "fk_products_users_product",
+      "columns": [
+        "product_ID"
+      ],
+      "referencesTable": "tb_products",
+      "referencesColumns": [
+        "ID"
+      ],
+      "definition": "CONSTRAINT `fk_products_users_product` FOREIGN KEY (`product_ID`) REFERENCES `tb_products` (`ID`)",
+      "onDelete": null,
+      "onUpdate": null,
+      "type": "FOREIGN KEY",
+      "table": "tbd_products_users"
+    },
+    {
+      "name": "fk_products_users_user",
+      "columns": [
+        "user_ID"
+      ],
+      "referencesTable": "db_users",
+      "referencesColumns": [
+        "ID"
+      ],
+      "definition": "CONSTRAINT `fk_products_users_user` FOREIGN KEY (`user_ID`) REFERENCES `db_users` (`ID`)",
+      "onDelete": null,
+      "onUpdate": null,
+      "type": "FOREIGN KEY",
+      "table": "tbd_products_users"
+    },
+    {
+      "name": "PRIMARY",
+      "type": "PRIMARY KEY",
+      "table": "tbd_products_users_providers",
+      "columns": [
+        "user_ID",
+        "product_ID"
+      ],
+      "definition": "PRIMARY KEY (`user_ID`,`product_ID`)"
+    },
+    {
+      "name": "fk_products2",
+      "columns": [
+        "product_ID"
+      ],
+      "referencesTable": "tb_products",
+      "referencesColumns": [
+        "ID"
+      ],
+      "definition": "CONSTRAINT `fk_products2` FOREIGN KEY (`product_ID`) REFERENCES `tb_products` (`ID`)",
+      "onDelete": null,
+      "onUpdate": null,
+      "type": "FOREIGN KEY",
+      "table": "tbd_products_users_providers"
+    },
+    {
+      "name": "fk_user1",
+      "columns": [
+        "user_ID"
+      ],
+      "referencesTable": "db_users",
+      "referencesColumns": [
+        "ID"
+      ],
+      "definition": "CONSTRAINT `fk_user1` FOREIGN KEY (`user_ID`) REFERENCES `db_users` (`ID`)",
+      "onDelete": null,
+      "onUpdate": null,
+      "type": "FOREIGN KEY",
+      "table": "tbd_products_users_providers"
+    },
+    {
+      "name": "PRIMARY",
+      "type": "PRIMARY KEY",
+      "table": "tbd_return_items",
+      "columns": [
+        "ID"
+      ],
+      "definition": "PRIMARY KEY (`ID`)"
+    },
+    {
+      "name": "chk_return_items_amount",
+      "expression": "(`unit_amount` >= 0)",
+      "definition": "CONSTRAINT `chk_return_items_amount` CHECK ((`unit_amount` >= 0))",
+      "type": "CHECK",
+      "table": "tbd_return_items"
+    },
+    {
+      "name": "chk_return_items_quantity",
+      "expression": "(`quantity` > 0)",
+      "definition": "CONSTRAINT `chk_return_items_quantity` CHECK ((`quantity` > 0))",
+      "type": "CHECK",
+      "table": "tbd_return_items"
+    },
+    {
+      "name": "fk_return_items_order_item",
+      "columns": [
+        "order_item_ID"
+      ],
+      "referencesTable": "tbd_order_items",
+      "referencesColumns": [
+        "ID"
+      ],
+      "definition": "CONSTRAINT `fk_return_items_order_item` FOREIGN KEY (`order_item_ID`) REFERENCES `tbd_order_items` (`ID`)",
+      "onDelete": null,
+      "onUpdate": null,
+      "type": "FOREIGN KEY",
+      "table": "tbd_return_items"
+    },
+    {
+      "name": "fk_return_items_return",
+      "columns": [
+        "return_ID"
+      ],
+      "referencesTable": "tb_returns",
+      "referencesColumns": [
+        "ID"
+      ],
+      "definition": "CONSTRAINT `fk_return_items_return` FOREIGN KEY (`return_ID`) REFERENCES `tb_returns` (`ID`)",
+      "onDelete": null,
+      "onUpdate": null,
+      "type": "FOREIGN KEY",
+      "table": "tbd_return_items"
+    },
+    {
+      "name": "PRIMARY",
+      "type": "PRIMARY KEY",
+      "table": "tbd_user_payment_methods",
+      "columns": [
+        "ID"
+      ],
+      "definition": "PRIMARY KEY (`ID`)"
+    },
+    {
+      "name": "tbd_user_payment_methods_ibfk_1",
+      "columns": [
+        "user_ID"
+      ],
+      "referencesTable": "db_users",
+      "referencesColumns": [
+        "ID"
+      ],
+      "definition": "CONSTRAINT `tbd_user_payment_methods_ibfk_1` FOREIGN KEY (`user_ID`) REFERENCES `db_users` (`ID`)",
+      "onDelete": null,
+      "onUpdate": null,
+      "type": "FOREIGN KEY",
+      "table": "tbd_user_payment_methods"
+    },
+    {
+      "name": "tbd_user_payment_methods_ibfk_2",
+      "columns": [
+        "payment_method_type_ID"
+      ],
+      "referencesTable": "tbc_payment_methods_types",
+      "referencesColumns": [
+        "ID"
+      ],
+      "definition": "CONSTRAINT `tbd_user_payment_methods_ibfk_2` FOREIGN KEY (`payment_method_type_ID`) REFERENCES `tbc_payment_methods_types` (`ID`)",
+      "onDelete": null,
+      "onUpdate": null,
+      "type": "FOREIGN KEY",
+      "table": "tbd_user_payment_methods"
+    },
+    {
+      "name": "uk_provider_method",
+      "columns": [
+        "provider",
+        "provider_method_ref"
+      ],
+      "definition": "UNIQUE KEY `uk_provider_method` (`provider`,`provider_method_ref`)",
+      "type": "UNIQUE",
+      "table": "tbd_user_payment_methods"
+    },
+    {
+      "name": "PRIMARY",
+      "type": "PRIMARY KEY",
+      "table": "tbd_users_wishlist_products",
+      "columns": [
+        "user_ID",
+        "product_ID"
+      ],
+      "definition": "PRIMARY KEY (`user_ID`,`product_ID`)"
+    },
+    {
+      "name": "fk_wishlist_product",
+      "columns": [
+        "product_ID"
+      ],
+      "referencesTable": "tb_products",
+      "referencesColumns": [
+        "ID"
+      ],
+      "definition": "CONSTRAINT `fk_wishlist_product` FOREIGN KEY (`product_ID`) REFERENCES `tb_products` (`ID`)",
+      "onDelete": null,
+      "onUpdate": null,
+      "type": "FOREIGN KEY",
+      "table": "tbd_users_wishlist_products"
+    },
+    {
+      "name": "fk_wishlist_user",
+      "columns": [
+        "user_ID"
+      ],
+      "referencesTable": "db_users",
+      "referencesColumns": [
+        "ID"
+      ],
+      "definition": "CONSTRAINT `fk_wishlist_user` FOREIGN KEY (`user_ID`) REFERENCES `db_users` (`ID`)",
+      "onDelete": null,
+      "onUpdate": null,
+      "type": "FOREIGN KEY",
+      "table": "tbd_users_wishlist_products"
+    }
+  ]
+}

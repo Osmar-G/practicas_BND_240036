@@ -1,0 +1,107 @@
+{
+  "name": "db_test_7b",
+  "source": "Respaldo14.sql",
+  "engine": [
+    "InnoDB"
+  ],
+  "tableCount": 26,
+  "columnCount": 235,
+  "relationshipCount": 39,
+  "primaryKeyCount": 26,
+  "foreignKeyCount": 39,
+  "manyToMany": [
+    {
+      "table": "tbd_carts_items",
+      "tableA": "tb_carts",
+      "columnsA": [
+        "ID"
+      ],
+      "tableB": "tbd_products_users",
+      "columnsB": [
+        "user_ID",
+        "product_ID"
+      ],
+      "viaColumns": [
+        "cart_ID",
+        "product_ID",
+        "provider_ID"
+      ],
+      "inferred": true,
+      "explanation": "La clave primaria de tbd_carts_items está formada por columnas que también son llaves foráneas hacia tb_carts y tbd_products_users; esto identifica una tabla de vínculo entre ambos lados."
+    },
+    {
+      "table": "tbd_products_categories",
+      "tableA": "tbc_categories",
+      "columnsA": [
+        "ID"
+      ],
+      "tableB": "tb_products",
+      "columnsB": [
+        "ID"
+      ],
+      "viaColumns": [
+        "category_Id",
+        "product_Id"
+      ],
+      "inferred": true,
+      "explanation": "La clave primaria de tbd_products_categories está formada por columnas que también son llaves foráneas hacia tbc_categories y tb_products; esto identifica una tabla de vínculo entre ambos lados."
+    },
+    {
+      "table": "tbd_products_users",
+      "tableA": "tb_products",
+      "columnsA": [
+        "ID"
+      ],
+      "tableB": "db_users",
+      "columnsB": [
+        "ID"
+      ],
+      "viaColumns": [
+        "product_ID",
+        "user_ID"
+      ],
+      "inferred": true,
+      "explanation": "La clave primaria de tbd_products_users está formada por columnas que también son llaves foráneas hacia tb_products y db_users; esto identifica una tabla de vínculo entre ambos lados."
+    },
+    {
+      "table": "tbd_products_users_providers",
+      "tableA": "tb_products",
+      "columnsA": [
+        "ID"
+      ],
+      "tableB": "db_users",
+      "columnsB": [
+        "ID"
+      ],
+      "viaColumns": [
+        "product_ID",
+        "user_ID"
+      ],
+      "inferred": true,
+      "explanation": "La clave primaria de tbd_products_users_providers está formada por columnas que también son llaves foráneas hacia tb_products y db_users; esto identifica una tabla de vínculo entre ambos lados."
+    },
+    {
+      "table": "tbd_users_wishlist_products",
+      "tableA": "tb_products",
+      "columnsA": [
+        "ID"
+      ],
+      "tableB": "db_users",
+      "columnsB": [
+        "ID"
+      ],
+      "viaColumns": [
+        "product_ID",
+        "user_ID"
+      ],
+      "inferred": true,
+      "explanation": "La clave primaria de tbd_users_wishlist_products está formada por columnas que también son llaves foráneas hacia tb_products y db_users; esto identifica una tabla de vínculo entre ambos lados."
+    }
+  ],
+  "viewCount": 0,
+  "procedureCount": 4,
+  "functionCount": 0,
+  "triggerCount": 75,
+  "generatedAt": "2026-11-12",
+  "notes": []
+}
