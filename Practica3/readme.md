@@ -2,7 +2,7 @@
 
 ## Descripción general
 
-En esta práctica se trabajó con una base de datos relacional en MySQL 8.0, enfocada en la creación, manipulación y validación de datos en un entorno remoto. La estructura del proyecto está organizada por carpetas para separar los respaldos, scripts de configuración, consultas de verificación y archivos semilla.
+En esta práctica se trabajó con una base de datos relacional en MySQL 8.0, enfocada en la creación, manipulación y validación de datos en un entorno remoto. La estructura del proyecto está organizada por módulos funcionales.
 
 La práctica incorpora:
 
@@ -11,6 +11,12 @@ La práctica incorpora:
 - Generación de respaldos SQL
 - Validación de datos mediante consultas
 - Carga masiva desde archivos CSV y SQL
+
+---
+
+## GitHub Pages
+
+[Visita mi sitio en GitHub Pages](https://osmar-g.github.io/practicas_BND_240036/)
 
 ---
 
