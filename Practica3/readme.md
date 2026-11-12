@@ -16,7 +16,7 @@ La práctica incorpora:
 
 ## GitHub Pages
 
-[Visita mi sitio en GitHub Pages](https://osmar-g.github.io/practicas_BND_240036/)
+[Visita mi Modelo ER y Diccionario de Datos en GitHub Pages](https://osmar-g.github.io/practicas_BND_240036/)
 
 ---
 
