@@ -1,13 +1,18 @@
 {
   "name": "db_test_7b",
+  "databases": [
+    "db_test_7b"
+  ],
   "source": "Respaldo14.sql",
   "engine": [
     "InnoDB"
   ],
   "tableCount": 26,
   "columnCount": 235,
+  "indexCount": 70,
   "relationshipCount": 39,
-  "primaryKeyCount": 26,
+  "primaryKeyCount": 32,
+  "primaryKeyTables": 26,
   "foreignKeyCount": 39,
   "manyToMany": [
     {
@@ -98,10 +103,10 @@
       "explanation": "La clave primaria de tbd_users_wishlist_products está formada por columnas que también son llaves foráneas hacia tb_products y db_users; esto identifica una tabla de vínculo entre ambos lados."
     }
   ],
-  "viewCount": 0,
+  "viewCount": 42,
   "procedureCount": 4,
   "functionCount": 0,
   "triggerCount": 75,
-  "generatedAt": "2026-11-12",
+  "generatedAt": "2026-11-12T18:47:22.957Z",
   "notes": []
 }

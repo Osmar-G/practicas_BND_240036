@@ -1,0 +1,146 @@
+{
+  "source": "Respaldo14.sql",
+  "generatedAt": "2026-11-12T18:47:23.079Z",
+  "totalTables": 26,
+  "totalColumns": 235,
+  "totalRelationships": 39,
+  "totalPrimaryKeyColumns": 32,
+  "totalForeignKeys": 39,
+  "totalIndexes": 70,
+  "totalRows": 58266,
+  "tablesWithRows": 6,
+  "emptyTables": 20,
+  "note": "Las filas corresponden a tuplas INSERT detectadas en el respaldo.",
+  "rowsByTable": [
+    {
+      "name": "db_users",
+      "insertRows": 7510,
+      "hasInsert": true
+    },
+    {
+      "name": "tb_buyer_orders",
+      "insertRows": 0,
+      "hasInsert": false
+    },
+    {
+      "name": "tb_cancellations",
+      "insertRows": 0,
+      "hasInsert": false
+    },
+    {
+      "name": "tb_carts",
+      "insertRows": 0,
+      "hasInsert": false
+    },
+    {
+      "name": "tb_logs",
+      "insertRows": 29137,
+      "hasInsert": true
+    },
+    {
+      "name": "tb_payment_methods",
+      "insertRows": 0,
+      "hasInsert": false
+    },
+    {
+      "name": "tb_payment_transactions",
+      "insertRows": 0,
+      "hasInsert": false
+    },
+    {
+      "name": "tb_payments",
+      "insertRows": 0,
+      "hasInsert": false
+    },
+    {
+      "name": "tb_people",
+      "insertRows": 7503,
+      "hasInsert": true
+    },
+    {
+      "name": "tb_products",
+      "insertRows": 7008,
+      "hasInsert": true
+    },
+    {
+      "name": "tb_refunds",
+      "insertRows": 0,
+      "hasInsert": false
+    },
+    {
+      "name": "tb_returns",
+      "insertRows": 0,
+      "hasInsert": false
+    },
+    {
+      "name": "tb_shipments",
+      "insertRows": 0,
+      "hasInsert": false
+    },
+    {
+      "name": "tb_user_addresses",
+      "insertRows": 0,
+      "hasInsert": false
+    },
+    {
+      "name": "tbc_categories",
+      "insertRows": 100,
+      "hasInsert": true
+    },
+    {
+      "name": "tbc_payment_methods_types",
+      "insertRows": 0,
+      "hasInsert": false
+    },
+    {
+      "name": "tbd_address_components",
+      "insertRows": 0,
+      "hasInsert": false
+    },
+    {
+      "name": "tbd_cancellation_items",
+      "insertRows": 0,
+      "hasInsert": false
+    },
+    {
+      "name": "tbd_carts_items",
+      "insertRows": 0,
+      "hasInsert": false
+    },
+    {
+      "name": "tbd_order_items",
+      "insertRows": 0,
+      "hasInsert": false
+    },
+    {
+      "name": "tbd_products_categories",
+      "insertRows": 7008,
+      "hasInsert": true
+    },
+    {
+      "name": "tbd_products_users",
+      "insertRows": 0,
+      "hasInsert": false
+    },
+    {
+      "name": "tbd_products_users_providers",
+      "insertRows": 0,
+      "hasInsert": false
+    },
+    {
+      "name": "tbd_return_items",
+      "insertRows": 0,
+      "hasInsert": false
+    },
+    {
+      "name": "tbd_user_payment_methods",
+      "insertRows": 0,
+      "hasInsert": false
+    },
+    {
+      "name": "tbd_users_wishlist_products",
+      "insertRows": 0,
+      "hasInsert": false
+    }
+  ]
+}

@@ -1,5 +1,174 @@
 {
-  "views": [],
+  "views": [
+    {
+      "name": "vw_total_products_by_category",
+      "definition": "CREATE VIEW `vw_total_products_by_category` AS select `c`.`ID` AS `category_ID`,`c`.`name` AS `category_name`,count(`pc`.`product_Id`) AS `total_products` from (`tbc_categories` `c` left join `tbd_products_categories` `pc` on((`pc`.`category_Id` = `c`.`ID`))) group by `c`.`ID`,`c`.`name`"
+    },
+    {
+      "name": "vw_trazabilidad_address_components",
+      "definition": "CREATE VIEW `vw_trazabilidad_address_components` AS select `tb_logs`.`ID` AS `ID`,`tb_logs`.`table_name` AS `table_name`,`tb_logs`.`table_operation` AS `table_operation`,`tb_logs`.`db_user` AS `db_user`,`tb_logs`.`record_id` AS `record_id`,`tb_logs`.`operation_date` AS `operation_date`,`tb_logs`.`table_description` AS `table_description`,`tb_logs`.`operation_status` AS `operation_status` from `tb_logs` where (`tb_logs`.`table_name` = 'tbd_address_components')"
+    },
+    {
+      "name": "vw_trazabilidad_buyer_orders",
+      "definition": "CREATE VIEW `vw_trazabilidad_buyer_orders` AS select `tb_logs`.`ID` AS `ID`,`tb_logs`.`table_name` AS `table_name`,`tb_logs`.`table_operation` AS `table_operation`,`tb_logs`.`db_user` AS `db_user`,`tb_logs`.`record_id` AS `record_id`,`tb_logs`.`operation_date` AS `operation_date`,`tb_logs`.`table_description` AS `table_description`,`tb_logs`.`operation_status` AS `operation_status` from `tb_logs` where (`tb_logs`.`table_name` = 'tb_buyer_orders')"
+    },
+    {
+      "name": "vw_trazabilidad_cancellation_items",
+      "definition": "CREATE VIEW `vw_trazabilidad_cancellation_items` AS select `tb_logs`.`ID` AS `ID`,`tb_logs`.`table_name` AS `table_name`,`tb_logs`.`table_operation` AS `table_operation`,`tb_logs`.`db_user` AS `db_user`,`tb_logs`.`record_id` AS `record_id`,`tb_logs`.`operation_date` AS `operation_date`,`tb_logs`.`table_description` AS `table_description`,`tb_logs`.`operation_status` AS `operation_status` from `tb_logs` where (`tb_logs`.`table_name` = 'tbd_cancellation_items')"
+    },
+    {
+      "name": "vw_trazabilidad_cancellations",
+      "definition": "CREATE VIEW `vw_trazabilidad_cancellations` AS select `tb_logs`.`ID` AS `ID`,`tb_logs`.`table_name` AS `table_name`,`tb_logs`.`table_operation` AS `table_operation`,`tb_logs`.`db_user` AS `db_user`,`tb_logs`.`record_id` AS `record_id`,`tb_logs`.`operation_date` AS `operation_date`,`tb_logs`.`table_description` AS `table_description`,`tb_logs`.`operation_status` AS `operation_status` from `tb_logs` where (`tb_logs`.`table_name` = 'tb_cancellations')"
+    },
+    {
+      "name": "vw_trazabilidad_carritos",
+      "definition": "CREATE VIEW `vw_trazabilidad_carritos` AS select `l`.`ID` AS `id_log`,`l`.`record_id` AS `id_carrito`,`c`.`user_ID` AS `id_usuario_actual`,`u`.`nick` AS `usuario_actual`,`l`.`table_operation` AS `operacion`,`l`.`db_user` AS `ejecutado_por`,`l`.`operation_date` AS `fecha_operacion`,`l`.`table_description` AS `detalle`,`l`.`operation_status` AS `operacion_exitosa` from ((`tb_logs` `l` left join `tb_carts` `c` on((`c`.`ID` = `l`.`record_id`))) left join `db_users` `u` on((`u`.`ID` = `c`.`user_ID`))) where (`l`.`table_name` = 'tb_carts')"
+    },
+    {
+      "name": "vw_trazabilidad_carts",
+      "definition": "CREATE VIEW `vw_trazabilidad_carts` AS select `tb_logs`.`ID` AS `ID`,`tb_logs`.`table_name` AS `table_name`,`tb_logs`.`table_operation` AS `table_operation`,`tb_logs`.`db_user` AS `db_user`,`tb_logs`.`record_id` AS `record_id`,`tb_logs`.`operation_date` AS `operation_date`,`tb_logs`.`table_description` AS `table_description`,`tb_logs`.`operation_status` AS `operation_status` from `tb_logs` where (`tb_logs`.`table_name` = 'tb_carts')"
+    },
+    {
+      "name": "vw_trazabilidad_carts_items",
+      "definition": "CREATE VIEW `vw_trazabilidad_carts_items` AS select `tb_logs`.`ID` AS `ID`,`tb_logs`.`table_name` AS `table_name`,`tb_logs`.`table_operation` AS `table_operation`,`tb_logs`.`db_user` AS `db_user`,`tb_logs`.`record_id` AS `record_id`,`tb_logs`.`operation_date` AS `operation_date`,`tb_logs`.`table_description` AS `table_description`,`tb_logs`.`operation_status` AS `operation_status` from `tb_logs` where (`tb_logs`.`table_name` = 'tbd_carts_items')"
+    },
+    {
+      "name": "vw_trazabilidad_categorias",
+      "definition": "CREATE VIEW `vw_trazabilidad_categorias` AS select `c`.`ID` AS `id_categoria`,`c`.`name` AS `categoria`,`c`.`description` AS `descripcion`,`c`.`sup_id_category` AS `id_categoria_superior`,coalesce(`sc`.`name`,'Categoría principal') AS `categoria_superior`,`c`.`status` AS `estado`,`l`.`db_user` AS `insertado_por`,`l`.`table_operation` AS `operacion`,`l`.`table_description` AS `descripcion_operacion`,`l`.`operation_date` AS `fecha_operacion` from ((`tbc_categories` `c` left join `tbc_categories` `sc` on((`sc`.`ID` = `c`.`sup_id_category`))) join `tb_logs` `l` on(((`l`.`record_id` = `c`.`ID`) and (`l`.`table_name` = 'tbc_categories') and (`l`.`table_operation` = 'Create')))) order by `l`.`operation_date` desc"
+    },
+    {
+      "name": "vw_trazabilidad_categorias_productos",
+      "definition": "CREATE VIEW `vw_trazabilidad_categorias_productos` AS select `c`.`ID` AS `category_id`,`c`.`name` AS `category`,(case when (`c`.`sup_id_category` is null) then `c`.`name` when (`p`.`sup_id_category` is null) then concat(`p`.`name`,' → ',`c`.`name`) when (`pp`.`sup_id_category` is null) then concat(`pp`.`name`,' → ',`p`.`name`,' → ',`c`.`name`) else concat(`ppp`.`name`,' → ',`pp`.`name`,' → ',`p`.`name`,' → ',`c`.`name`) end) AS `category_path`,(case when (`c`.`sup_id_category` is null) then 1 when (`p`.`sup_id_category` is null) then 2 when (`pp`.`sup_id_category` is null) then 3 else 4 end) AS `category_level`,count(distinct `pc`.`product_Id`) AS `total_products`,count(distinct (case when (`pr`.`status` = 0x01) then `pr`.`ID` end)) AS `total_active_products`,count(distinct (case when (`pr`.`status` = 0x00) then `pr`.`ID` end)) AS `total_inactive_products`,(select count(0) from `tb_products` `x` where exists(select 1 from `tbd_products_categories` `xpc` where (`xpc`.`product_Id` = `x`.`ID`)) is false) AS `total_uncategorized_products` from (((((`tbc_categories` `c` left join `tbc_categories` `p` on((`c`.`sup_id_category` = `p`.`ID`))) left join `tbc_categories` `pp` on((`p`.`sup_id_category` = `pp`.`ID`))) left join `tbc_categories` `ppp` on((`pp`.`sup_id_category` = `ppp`.`ID`))) left join `tbd_products_categories` `pc` on((`c`.`ID` = `pc`.`category_Id`))) left join `tb_products` `pr` on((`pc`.`product_Id` = `pr`.`ID`))) group by `c`.`ID`,`c`.`name`,`c`.`sup_id_category`,`p`.`ID`,`p`.`name`,`p`.`sup_id_category`,`pp`.`ID`,`pp`.`name`,`pp`.`sup_id_category`,`ppp`.`ID`,`ppp`.`name` order by `category_path`"
+    },
+    {
+      "name": "vw_trazabilidad_categorizaciones",
+      "definition": "CREATE VIEW `vw_trazabilidad_categorizaciones` AS select `pc`.`product_Id` AS `id_producto`,`p`.`name` AS `producto`,`pc`.`category_Id` AS `id_categoria`,`c`.`name` AS `categoria`,`pc`.`status` AS `estado`,`l`.`db_user` AS `insertado_por`,`l`.`table_operation` AS `operacion`,`l`.`table_description` AS `descripcion_operacion`,`l`.`operation_date` AS `fecha_operacion` from (((`tbd_products_categories` `pc` join `tb_products` `p` on((`p`.`ID` = `pc`.`product_Id`))) join `tbc_categories` `c` on((`c`.`ID` = `pc`.`category_Id`))) join `tb_logs` `l` on(((`l`.`record_id` = `pc`.`product_Id`) and (`l`.`table_name` = 'tbd_products_categories') and (`l`.`table_operation` = 'Create') and (`l`.`table_description` like concat('%categoría: ',`pc`.`category_Id`,'.%'))))) order by `l`.`operation_date` desc"
+    },
+    {
+      "name": "vw_trazabilidad_componentes_direccion",
+      "definition": "CREATE VIEW `vw_trazabilidad_componentes_direccion` AS select `l`.`ID` AS `id_log`,`l`.`table_name` AS `tabla`,`l`.`table_operation` AS `operacion`,`l`.`db_user` AS `ejecutado_por`,`l`.`record_id` AS `id_registro`,`l`.`operation_date` AS `fecha_operacion`,`l`.`table_description` AS `detalle`,`l`.`operation_status` AS `operacion_exitosa` from `tb_logs` `l` where (`l`.`table_name` = 'tbd_address_components')"
+    },
+    {
+      "name": "vw_trazabilidad_detalle_carritos",
+      "definition": "CREATE VIEW `vw_trazabilidad_detalle_carritos` AS select `l`.`ID` AS `id_log`,`l`.`table_name` AS `tabla`,`l`.`table_operation` AS `operacion`,`l`.`db_user` AS `ejecutado_por`,`l`.`record_id` AS `id_registro`,`l`.`operation_date` AS `fecha_operacion`,`l`.`table_description` AS `detalle`,`l`.`operation_status` AS `operacion_exitosa` from `tb_logs` `l` where (`l`.`table_name` = 'tbd_carts_items')"
+    },
+    {
+      "name": "vw_trazabilidad_detalle_pedidos",
+      "definition": "CREATE VIEW `vw_trazabilidad_detalle_pedidos` AS select `l`.`ID` AS `id_log`,`l`.`table_name` AS `tabla`,`l`.`table_operation` AS `operacion`,`l`.`db_user` AS `ejecutado_por`,`l`.`record_id` AS `id_registro`,`l`.`operation_date` AS `fecha_operacion`,`l`.`table_description` AS `detalle`,`l`.`operation_status` AS `operacion_exitosa` from `tb_logs` `l` where (`l`.`table_name` = 'tbd_order_items')"
+    },
+    {
+      "name": "vw_trazabilidad_direcciones_usuarios",
+      "definition": "CREATE VIEW `vw_trazabilidad_direcciones_usuarios` AS select `l`.`ID` AS `id_log`,`l`.`table_name` AS `tabla`,`l`.`table_operation` AS `operacion`,`l`.`db_user` AS `ejecutado_por`,`l`.`record_id` AS `id_registro`,`l`.`operation_date` AS `fecha_operacion`,`l`.`table_description` AS `detalle`,`l`.`operation_status` AS `operacion_exitosa` from `tb_logs` `l` where (`l`.`table_name` = 'tb_user_addresses')"
+    },
+    {
+      "name": "vw_trazabilidad_general",
+      "definition": "CREATE VIEW `vw_trazabilidad_general` AS select `tb_logs`.`ID` AS `ID`,`tb_logs`.`table_name` AS `table_name`,`tb_logs`.`table_operation` AS `table_operation`,`tb_logs`.`db_user` AS `db_user`,`tb_logs`.`record_id` AS `record_id`,`tb_logs`.`operation_date` AS `operation_date`,`tb_logs`.`table_description` AS `table_description`,`tb_logs`.`operation_status` AS `operation_status` from `tb_logs`"
+    },
+    {
+      "name": "vw_trazabilidad_lista_deseos",
+      "definition": "CREATE VIEW `vw_trazabilidad_lista_deseos` AS select `l`.`ID` AS `id_log`,`l`.`record_id` AS `id_producto_registrado`,`l`.`table_operation` AS `operacion`,`l`.`db_user` AS `ejecutado_por`,`l`.`operation_date` AS `fecha_operacion`,`l`.`table_description` AS `detalle`,`l`.`operation_status` AS `operacion_exitosa`,`p`.`name` AS `nombre_producto` from (`tb_logs` `l` left join `tb_products` `p` on((`p`.`ID` = `l`.`record_id`))) where (`l`.`table_name` = 'tbd_users_wishlist_products')"
+    },
+    {
+      "name": "vw_trazabilidad_metodos_pago_usuarios",
+      "definition": "CREATE VIEW `vw_trazabilidad_metodos_pago_usuarios` AS select `l`.`ID` AS `id_log`,`l`.`table_name` AS `tabla`,`l`.`table_operation` AS `operacion`,`l`.`db_user` AS `ejecutado_por`,`l`.`record_id` AS `id_registro`,`l`.`operation_date` AS `fecha_operacion`,`l`.`table_description` AS `detalle`,`l`.`operation_status` AS `operacion_exitosa` from `tb_logs` `l` where (`l`.`table_name` = 'tbd_user_payment_methods')"
+    },
+    {
+      "name": "vw_trazabilidad_order_items",
+      "definition": "CREATE VIEW `vw_trazabilidad_order_items` AS select `tb_logs`.`ID` AS `ID`,`tb_logs`.`table_name` AS `table_name`,`tb_logs`.`table_operation` AS `table_operation`,`tb_logs`.`db_user` AS `db_user`,`tb_logs`.`record_id` AS `record_id`,`tb_logs`.`operation_date` AS `operation_date`,`tb_logs`.`table_description` AS `table_description`,`tb_logs`.`operation_status` AS `operation_status` from `tb_logs` where (`tb_logs`.`table_name` = 'tbd_order_items')"
+    },
+    {
+      "name": "vw_trazabilidad_orders",
+      "definition": "CREATE VIEW `vw_trazabilidad_orders` AS select `tb_logs`.`ID` AS `ID`,`tb_logs`.`table_name` AS `table_name`,`tb_logs`.`table_operation` AS `table_operation`,`tb_logs`.`db_user` AS `db_user`,`tb_logs`.`record_id` AS `record_id`,`tb_logs`.`operation_date` AS `operation_date`,`tb_logs`.`table_description` AS `table_description`,`tb_logs`.`operation_status` AS `operation_status` from `tb_logs` where (`tb_logs`.`table_name` = 'tb_buyer_orders')"
+    },
+    {
+      "name": "vw_trazabilidad_payment_methods",
+      "definition": "CREATE VIEW `vw_trazabilidad_payment_methods` AS select `tb_logs`.`ID` AS `ID`,`tb_logs`.`table_name` AS `table_name`,`tb_logs`.`table_operation` AS `table_operation`,`tb_logs`.`db_user` AS `db_user`,`tb_logs`.`record_id` AS `record_id`,`tb_logs`.`operation_date` AS `operation_date`,`tb_logs`.`table_description` AS `table_description`,`tb_logs`.`operation_status` AS `operation_status` from `tb_logs` where (`tb_logs`.`table_name` = 'tb_payment_methods')"
+    },
+    {
+      "name": "vw_trazabilidad_payment_methods_types",
+      "definition": "CREATE VIEW `vw_trazabilidad_payment_methods_types` AS select `tb_logs`.`ID` AS `ID`,`tb_logs`.`table_name` AS `table_name`,`tb_logs`.`table_operation` AS `table_operation`,`tb_logs`.`db_user` AS `db_user`,`tb_logs`.`record_id` AS `record_id`,`tb_logs`.`operation_date` AS `operation_date`,`tb_logs`.`table_description` AS `table_description`,`tb_logs`.`operation_status` AS `operation_status` from `tb_logs` where (`tb_logs`.`table_name` = 'tbc_payment_methods_types')"
+    },
+    {
+      "name": "vw_trazabilidad_pedidos",
+      "definition": "CREATE VIEW `vw_trazabilidad_pedidos` AS select `l`.`ID` AS `id_log`,`l`.`table_name` AS `tabla`,`l`.`table_operation` AS `operacion`,`l`.`db_user` AS `ejecutado_por`,`l`.`record_id` AS `id_registro`,`l`.`operation_date` AS `fecha_operacion`,`l`.`table_description` AS `detalle`,`l`.`operation_status` AS `operacion_exitosa` from `tb_logs` `l` where (`l`.`table_name` = 'tb_buyer_orders')"
+    },
+    {
+      "name": "vw_trazabilidad_people",
+      "definition": "CREATE VIEW `vw_trazabilidad_people` AS select `tb_logs`.`ID` AS `ID`,`tb_logs`.`table_name` AS `table_name`,`tb_logs`.`table_operation` AS `table_operation`,`tb_logs`.`db_user` AS `db_user`,`tb_logs`.`record_id` AS `record_id`,`tb_logs`.`operation_date` AS `operation_date`,`tb_logs`.`table_description` AS `table_description`,`tb_logs`.`operation_status` AS `operation_status` from `tb_logs` where (`tb_logs`.`table_name` = 'tb_people')"
+    },
+    {
+      "name": "vw_trazabilidad_personas",
+      "definition": "CREATE VIEW `vw_trazabilidad_personas` AS select `l`.`ID` AS `id_log`,`l`.`table_name` AS `tabla`,`l`.`table_operation` AS `operacion`,`l`.`db_user` AS `ejecutado_por`,`l`.`record_id` AS `id_registro`,`l`.`operation_date` AS `fecha_operacion`,`l`.`table_description` AS `detalle`,`l`.`operation_status` AS `operacion_exitosa` from `tb_logs` `l` where (`l`.`table_name` = 'tb_people')"
+    },
+    {
+      "name": "vw_trazabilidad_productos",
+      "definition": "CREATE VIEW `vw_trazabilidad_productos` AS select `p`.`ID` AS `id`,`p`.`name` AS `name`,`p`.`description` AS `description`,`b`.`db_user` AS `inserted_by`,coalesce(group_concat(distinct `re`.`FROM_USER` order by `re`.`FROM_USER` ASC separator ', '),'Sin rol') AS `roles`,`b`.`table_description` AS `table_description`,`b`.`operation_date` AS `operation_date` from ((`tb_products` `p` join `tb_logs` `b` on(((`b`.`record_id` = `p`.`ID`) and (`b`.`table_name` = 'tb_products') and (`b`.`table_operation` = 'Create')))) left join `mysql`.`role_edges` `re` on((`re`.`TO_USER` = substring_index(`b`.`db_user`,'@',1)))) group by `p`.`ID`,`p`.`name`,`p`.`description`,`b`.`db_user`,`b`.`table_description`,`b`.`operation_date`"
+    },
+    {
+      "name": "vw_trazabilidad_productos_categorias",
+      "definition": "CREATE VIEW `vw_trazabilidad_productos_categorias` AS select `pc`.`product_Id` AS `id_producto`,`p`.`name` AS `producto`,`pc`.`category_Id` AS `id_categoria`,`c`.`name` AS `categoria`,`pc`.`status` AS `estado`,`pc`.`creation_date` AS `fecha_asignacion`,`pc`.`last_update` AS `ultima_actualizacion` from ((`tbd_products_categories` `pc` join `tb_products` `p` on((`p`.`ID` = `pc`.`product_Id`))) join `tbc_categories` `c` on((`c`.`ID` = `pc`.`category_Id`)))"
+    },
+    {
+      "name": "vw_trazabilidad_productos_proveedores",
+      "definition": "CREATE VIEW `vw_trazabilidad_productos_proveedores` AS select `tb_logs`.`ID` AS `ID`,`tb_logs`.`table_name` AS `table_name`,`tb_logs`.`table_operation` AS `table_operation`,`tb_logs`.`db_user` AS `db_user`,`tb_logs`.`record_id` AS `record_id`,`tb_logs`.`operation_date` AS `operation_date`,`tb_logs`.`table_description` AS `table_description`,`tb_logs`.`operation_status` AS `operation_status` from `tb_logs` where (`tb_logs`.`table_name` = 'tbd_products_users_providers')"
+    },
+    {
+      "name": "vw_trazabilidad_productos_usuarios",
+      "definition": "CREATE VIEW `vw_trazabilidad_productos_usuarios` AS select `l`.`ID` AS `id_log`,`l`.`record_id` AS `id_producto_registrado`,`l`.`table_operation` AS `operacion`,`l`.`db_user` AS `ejecutado_por`,`l`.`operation_date` AS `fecha_operacion`,`l`.`table_description` AS `detalle`,`l`.`operation_status` AS `operacion_exitosa`,`p`.`name` AS `nombre_producto` from (`tb_logs` `l` left join `tb_products` `p` on((`p`.`ID` = `l`.`record_id`))) where (`l`.`table_name` = 'tbd_products_users')"
+    },
+    {
+      "name": "vw_trazabilidad_refunds",
+      "definition": "CREATE VIEW `vw_trazabilidad_refunds` AS select `tb_logs`.`ID` AS `ID`,`tb_logs`.`table_name` AS `table_name`,`tb_logs`.`table_operation` AS `table_operation`,`tb_logs`.`db_user` AS `db_user`,`tb_logs`.`record_id` AS `record_id`,`tb_logs`.`operation_date` AS `operation_date`,`tb_logs`.`table_description` AS `table_description`,`tb_logs`.`operation_status` AS `operation_status` from `tb_logs` where (`tb_logs`.`table_name` = 'tb_refunds')"
+    },
+    {
+      "name": "vw_trazabilidad_return_items",
+      "definition": "CREATE VIEW `vw_trazabilidad_return_items` AS select `tb_logs`.`ID` AS `ID`,`tb_logs`.`table_name` AS `table_name`,`tb_logs`.`table_operation` AS `table_operation`,`tb_logs`.`db_user` AS `db_user`,`tb_logs`.`record_id` AS `record_id`,`tb_logs`.`operation_date` AS `operation_date`,`tb_logs`.`table_description` AS `table_description`,`tb_logs`.`operation_status` AS `operation_status` from `tb_logs` where (`tb_logs`.`table_name` = 'tbd_return_items')"
+    },
+    {
+      "name": "vw_trazabilidad_returns",
+      "definition": "CREATE VIEW `vw_trazabilidad_returns` AS select `tb_logs`.`ID` AS `ID`,`tb_logs`.`table_name` AS `table_name`,`tb_logs`.`table_operation` AS `table_operation`,`tb_logs`.`db_user` AS `db_user`,`tb_logs`.`record_id` AS `record_id`,`tb_logs`.`operation_date` AS `operation_date`,`tb_logs`.`table_description` AS `table_description`,`tb_logs`.`operation_status` AS `operation_status` from `tb_logs` where (`tb_logs`.`table_name` = 'tb_returns')"
+    },
+    {
+      "name": "vw_trazabilidad_shipments",
+      "definition": "CREATE VIEW `vw_trazabilidad_shipments` AS select `tb_logs`.`ID` AS `ID`,`tb_logs`.`table_name` AS `table_name`,`tb_logs`.`table_operation` AS `table_operation`,`tb_logs`.`db_user` AS `db_user`,`tb_logs`.`record_id` AS `record_id`,`tb_logs`.`operation_date` AS `operation_date`,`tb_logs`.`table_description` AS `table_description`,`tb_logs`.`operation_status` AS `operation_status` from `tb_logs` where (`tb_logs`.`table_name` = 'tb_shipments')"
+    },
+    {
+      "name": "vw_trazabilidad_tb_payment_transactions",
+      "definition": "CREATE VIEW `vw_trazabilidad_tb_payment_transactions` AS select `tb_logs`.`ID` AS `ID`,`tb_logs`.`table_name` AS `table_name`,`tb_logs`.`table_operation` AS `table_operation`,`tb_logs`.`db_user` AS `db_user`,`tb_logs`.`record_id` AS `record_id`,`tb_logs`.`operation_date` AS `operation_date`,`tb_logs`.`table_description` AS `table_description`,`tb_logs`.`operation_status` AS `operation_status` from `tb_logs` where (`tb_logs`.`table_name` = 'tb_payment_transactions')"
+    },
+    {
+      "name": "vw_trazabilidad_tb_payments",
+      "definition": "CREATE VIEW `vw_trazabilidad_tb_payments` AS select `tb_logs`.`ID` AS `ID`,`tb_logs`.`table_name` AS `table_name`,`tb_logs`.`table_operation` AS `table_operation`,`tb_logs`.`db_user` AS `db_user`,`tb_logs`.`record_id` AS `record_id`,`tb_logs`.`operation_date` AS `operation_date`,`tb_logs`.`table_description` AS `table_description`,`tb_logs`.`operation_status` AS `operation_status` from `tb_logs` where (`tb_logs`.`table_name` = 'tb_payments')"
+    },
+    {
+      "name": "vw_trazabilidad_tb_products",
+      "definition": "CREATE VIEW `vw_trazabilidad_tb_products` AS select `tb_logs`.`ID` AS `ID`,`tb_logs`.`table_name` AS `table_name`,`tb_logs`.`table_operation` AS `table_operation`,`tb_logs`.`db_user` AS `db_user`,`tb_logs`.`record_id` AS `record_id`,`tb_logs`.`operation_date` AS `operation_date`,`tb_logs`.`table_description` AS `table_description`,`tb_logs`.`operation_status` AS `operation_status` from `tb_logs` where (`tb_logs`.`table_name` = 'tb_products')"
+    },
+    {
+      "name": "vw_trazabilidad_tbd_products_categories",
+      "definition": "CREATE VIEW `vw_trazabilidad_tbd_products_categories` AS select `tb_logs`.`ID` AS `ID`,`tb_logs`.`table_name` AS `table_name`,`tb_logs`.`table_operation` AS `table_operation`,`tb_logs`.`db_user` AS `db_user`,`tb_logs`.`record_id` AS `record_id`,`tb_logs`.`operation_date` AS `operation_date`,`tb_logs`.`table_description` AS `table_description`,`tb_logs`.`operation_status` AS `operation_status` from `tb_logs` where (`tb_logs`.`table_name` = 'tbd_products_categories')"
+    },
+    {
+      "name": "vw_trazabilidad_tipos_metodos_pago",
+      "definition": "CREATE VIEW `vw_trazabilidad_tipos_metodos_pago` AS select `l`.`ID` AS `id_log`,`l`.`table_name` AS `tabla`,`l`.`table_operation` AS `operacion`,`l`.`db_user` AS `ejecutado_por`,`l`.`record_id` AS `id_registro`,`l`.`operation_date` AS `fecha_operacion`,`l`.`table_description` AS `detalle`,`l`.`operation_status` AS `operacion_exitosa` from `tb_logs` `l` where (`l`.`table_name` = 'tbc_payment_methods_types')"
+    },
+    {
+      "name": "vw_trazabilidad_user_addresses",
+      "definition": "CREATE VIEW `vw_trazabilidad_user_addresses` AS select `tb_logs`.`ID` AS `ID`,`tb_logs`.`table_name` AS `table_name`,`tb_logs`.`table_operation` AS `table_operation`,`tb_logs`.`db_user` AS `db_user`,`tb_logs`.`record_id` AS `record_id`,`tb_logs`.`operation_date` AS `operation_date`,`tb_logs`.`table_description` AS `table_description`,`tb_logs`.`operation_status` AS `operation_status` from `tb_logs` where (`tb_logs`.`table_name` = 'tb_user_addresses')"
+    },
+    {
+      "name": "vw_trazabilidad_user_payment_methods",
+      "definition": "CREATE VIEW `vw_trazabilidad_user_payment_methods` AS select `tb_logs`.`ID` AS `ID`,`tb_logs`.`table_name` AS `table_name`,`tb_logs`.`table_operation` AS `table_operation`,`tb_logs`.`db_user` AS `db_user`,`tb_logs`.`record_id` AS `record_id`,`tb_logs`.`operation_date` AS `operation_date`,`tb_logs`.`table_description` AS `table_description`,`tb_logs`.`operation_status` AS `operation_status` from `tb_logs` where (`tb_logs`.`table_name` = 'tbd_user_payment_methods')"
+    },
+    {
+      "name": "vw_trazabilidad_users_wishlist_products",
+      "definition": "CREATE VIEW `vw_trazabilidad_users_wishlist_products` AS select `tb_logs`.`ID` AS `ID`,`tb_logs`.`table_name` AS `table_name`,`tb_logs`.`table_operation` AS `table_operation`,`tb_logs`.`db_user` AS `db_user`,`tb_logs`.`record_id` AS `record_id`,`tb_logs`.`operation_date` AS `operation_date`,`tb_logs`.`table_description` AS `table_description`,`tb_logs`.`operation_status` AS `operation_status` from `tb_logs` where (`tb_logs`.`table_name` = 'tbd_users_wishlist_products')"
+    },
+    {
+      "name": "vw_trazabilidad_usuarios",
+      "definition": "CREATE VIEW `vw_trazabilidad_usuarios` AS select `u`.`ID` AS `id`,`u`.`nick` AS `username`,`u`.`email` AS `email`,`b`.`db_user` AS `inserted_by`,coalesce(group_concat(distinct `re`.`FROM_USER` order by `re`.`FROM_USER` ASC separator ', '),'Sin rol') AS `roles`,`b`.`table_description` AS `table_description`,`b`.`operation_date` AS `operation_date` from ((`db_users` `u` join `tb_logs` `b` on((`b`.`table_description` like concat('%ID=',`u`.`ID`,'%')))) left join `mysql`.`role_edges` `re` on((`re`.`TO_USER` = substring_index(`b`.`db_user`,'@',1)))) where ((`b`.`table_operation` = 'Create') and (`b`.`table_name` = 'db_users')) group by `u`.`ID`,`u`.`nick`,`u`.`email`,`b`.`db_user`,`b`.`table_description`,`b`.`operation_date`"
+    }
+  ],
   "procedures": [
     {
       "name": "sp_generate_test_users",

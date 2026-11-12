@@ -1,10 +1,11 @@
-// Build-time MySQL dump analyzer. Reads DDL only; INSERT statements are never parsed or emitted.
+// Build-time MySQL dump analyzer. Produces static metadata for GitHub Pages.
 const fs = require('fs');
 const path = require('path');
 const input = process.argv[2] || 'Practica3/backups/Respaldo14.sql';
 const output = process.argv[3] || 'data';
 const sql = fs.readFileSync(input, 'utf8');
 const db = (sql.match(/CREATE\s+DATABASE\s+(?:IF\s+NOT\s+EXISTS\s+)?`([^`]+)`/i) || [])[1] || 'Desconocida';
+const databases=[...new Set([...sql.matchAll(/CREATE\s+DATABASE\s+(?:IF\s+NOT\s+EXISTS\s+)?`([^`]+)`/gi)].map(m=>m[1]))];
 
 function balanced(text, start) {
   let depth = 0, quote = '', esc = false;
@@ -54,13 +55,17 @@ function routines(kind){const out=[],re=new RegExp('CREATE\\s+(?:DEFINER=`[^`]*`
     def=def.replace(/'[^']*@[a-z0-9.-]+\.[a-z]{2,}[^']*'/gi,"'[correo omitido]'").replace(/(password\s*(?:=|,)\s*)'[^']*'/gi,"$1'[valor omitido]'");
     out.push({name:m[1],definition:def});}return out;}
 const procedures=routines('PROCEDURE'), functions=routines('FUNCTION');
-const views=[]; // No VIEW definition is emitted unless a CREATE VIEW statement exists.
-const relationships=tables.flatMap(t=>t.foreignKeys.map(f=>({name:f.name,fromTable:t.name,fromColumns:f.columns,toTable:f.referencesTable,toColumns:f.referencesColumns,onDelete:f.onDelete,onUpdate:f.onUpdate,definition:f.definition,cardinality:f.columns.length===1&&t.uniqueKeys.some(k=>k.columns.length===1&&k.columns[0]===f.columns[0])?'1:1':'1:N',confirmed:true})));
+const views=[];
+const viewRe=/\/\*!\d+\s+VIEW\s+`([^`]+)`\s+AS\s+([\s\S]*?)\*\//gi;
+for(const m of sql.matchAll(viewRe))views.push({name:m[1],definition:`CREATE VIEW \`${m[1]}\` AS ${m[2].trim()}`});
+const relationships=tables.flatMap(t=>t.foreignKeys.map(f=>{const fk=[...f.columns].sort().join('\0'),uniqueSets=[t.primaryKey,...t.uniqueKeys.map(k=>k.columns)].filter(x=>x.length).map(x=>[...x].sort().join('\0'));return{name:f.name,fromTable:t.name,fromColumns:f.columns,toTable:f.referencesTable,toColumns:f.referencesColumns,onDelete:f.onDelete,onUpdate:f.onUpdate,definition:f.definition,cardinality:uniqueSets.includes(fk)?'1:1':'1:N',confirmed:true}}));
 const manyToMany=[];
 for(const t of tables){const fkCols=[...new Set(t.foreignKeys.flatMap(f=>f.columns))].sort(),pkCols=[...t.primaryKey].sort();if(t.foreignKeys.length<2||fkCols.length!==pkCols.length||fkCols.some((c,i)=>c!==pkCols[i]))continue;const refs=[];for(const f of t.foreignKeys){if(!refs.some(x=>x.table===f.referencesTable))refs.push({table:f.referencesTable,columns:f.referencesColumns});}for(let i=0;i<refs.length;i++)for(let j=i+1;j<refs.length;j++){const a=refs[i],b=refs[j];if(a.table===t.name||b.table===t.name)continue;manyToMany.push({table:t.name,tableA:a.table,columnsA:a.columns,tableB:b.table,columnsB:b.columns,viaColumns:fkCols,inferred:true,explanation:`La clave primaria de ${t.name} está formada por columnas que también son llaves foráneas hacia ${a.table} y ${b.table}; esto identifica una tabla de vínculo entre ambos lados.`});}}
 const tableSet=new Set(tables.map(t=>t.name));
 const unresolved=relationships.filter(r=>!tableSet.has(r.toTable));
-const dbMeta={name:db,source:'Respaldo14.sql',engine:[...new Set(tables.map(t=>t.engine).filter(Boolean))],tableCount:tables.length,columnCount:tables.reduce((a,t)=>a+t.columns.length,0),relationshipCount:relationships.length,primaryKeyCount:tables.filter(t=>t.primaryKey.length).length,foreignKeyCount:relationships.length,manyToMany,viewCount:views.length,procedureCount:procedures.length,functionCount:functions.length,triggerCount:triggers.length,generatedAt:new Date().toISOString().slice(0,10),notes:unresolved.map(r=>`La FK ${r.name} refiere a tabla no definida en el respaldo: ${r.toTable}`)};
+const indexCount=tables.reduce((sum,t)=>sum+t.indexes.length+t.uniqueKeys.length+(t.primaryKey.length?1:0),0);
+const dbMeta={name:db,databases,source:'Respaldo14.sql',engine:[...new Set(tables.map(t=>t.engine).filter(Boolean))],tableCount:tables.length,columnCount:tables.reduce((a,t)=>a+t.columns.length,0),indexCount,relationshipCount:relationships.length,primaryKeyCount:tables.reduce((n,t)=>n+t.primaryKey.length,0),primaryKeyTables:tables.filter(t=>t.primaryKey.length).length,foreignKeyCount:relationships.length,manyToMany,viewCount:views.length,procedureCount:procedures.length,functionCount:functions.length,triggerCount:triggers.length,generatedAt:new Date().toISOString(),notes:unresolved.map(r=>`La FK ${r.name} refiere a tabla no definida en el respaldo: ${r.toTable}`)};
 fs.mkdirSync(output,{recursive:true});
-for(const [file,data] of Object.entries({'database.json':dbMeta,'tables.json':tables,'relationships.json':relationships,'components.json':{views,procedures,functions,triggers,indexes:tables.flatMap(t=>t.indexes.map(i=>({...i,table:t.name}))),constraints:tables.flatMap(t=>[...(t.primaryKey.length?[{name:'PRIMARY',type:'PRIMARY KEY',table:t.name,columns:t.primaryKey,definition:t.primaryKeyDefinition}]:[]),...t.checks.map(x=>({...x,type:'CHECK',table:t.name})),...t.foreignKeys.map(f=>({...f,type:'FOREIGN KEY',table:t.name})),...t.uniqueKeys.map(k=>({...k,type:'UNIQUE',table:t.name}))])}}))fs.writeFileSync(path.join(output,file),JSON.stringify(data,null,2)+'\n');
+const stats={source:'Respaldo14.sql',generatedAt:dbMeta.generatedAt,totalTables:dbMeta.tableCount,totalColumns:dbMeta.columnCount,totalRelationships:dbMeta.relationshipCount,totalPrimaryKeyColumns:dbMeta.primaryKeyCount,totalForeignKeys:dbMeta.foreignKeyCount,totalIndexes:dbMeta.indexCount,totalRows:null,tablesWithRows:null,emptyTables:null,note:'Las filas corresponden a tuplas INSERT detectadas en el respaldo.'};
+for(const [file,data] of Object.entries({'database.json':dbMeta,'structure.json':{database:dbMeta,tables,relationships,manyToMany},'estadisticas.json':stats,'tables.json':tables,'relationships.json':relationships,'components.json':{views,procedures,functions,triggers,indexes:tables.flatMap(t=>t.indexes.map(i=>({...i,table:t.name}))),constraints:tables.flatMap(t=>[...(t.primaryKey.length?[{name:'PRIMARY',type:'PRIMARY KEY',table:t.name,columns:t.primaryKey,definition:t.primaryKeyDefinition}]:[]),...t.checks.map(x=>({...x,type:'CHECK',table:t.name})),...t.foreignKeys.map(f=>({...f,type:'FOREIGN KEY',table:t.name})),...t.uniqueKeys.map(k=>({...k,type:'UNIQUE',table:t.name}))])}}))fs.writeFileSync(path.join(output,file),JSON.stringify(data,null,2)+'\n');
 console.log(`Estructura extraída: ${tables.length} tablas, ${dbMeta.columnCount} columnas, ${relationships.length} FK, ${views.length} vistas, ${procedures.length} procedimientos, ${functions.length} funciones, ${triggers.length} triggers.`);
