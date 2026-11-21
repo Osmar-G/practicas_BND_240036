@@ -7,6 +7,7 @@ Periodo: Septiembre - Diciembre 2026
 ---
 
 ### Tabla de Practicas de la Materia
+Link de Diccionario de Datos y Modelo ER -> https://osmar-g.github.io/practicas_BND_240036/ 
 
 |No.| Nombre | Descripción | Potenciador | Estatus |
 |---|---|---|---|---|
