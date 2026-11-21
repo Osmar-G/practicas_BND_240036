@@ -2,11 +2,12 @@
 // Values in likely secret/payment fields are masked before they enter public JSON.
 const fs = require('fs');
 const path = require('path');
-const input = process.argv[2] || 'Practica3/backups/Respaldo14.sql';
-const outDir = process.argv[3] || 'data/records';
+const { BACKUP_FILE, DATA_DIR, RECORDS_DIR } = require('./config');
+const input = process.argv[2] || BACKUP_FILE;
+const outDir = process.argv[3] || RECORDS_DIR;
 const pageSize = 100;
 const sql = fs.readFileSync(input, 'utf8');
-const schema = JSON.parse(fs.readFileSync('data/tables.json', 'utf8'));
+const schema = JSON.parse(fs.readFileSync(path.join(DATA_DIR, 'tables.json'), 'utf8'));
 const byTable = new Map(schema.map(t => [t.name, t]));
 const counts = new Map(schema.map(t => [t.name, 0]));
 const sensitive = /password|passwd|secret|token|hash|salt|cvv|cvc|card.?number|credit.?card|api.?key|authorization|email|phone|mobile|address|first.?name|last.?name|full.?name|username|user.?name|ip.?address|given.?names|family.?names|recipient.?name|(^|_)nick$|db.?user|tracking|provider.?reference|payment.?reference|event.?reference|last.?four|latitude|longitude|delivery.?instructions|birth.?date|gender|country.?code|(^|_)user.?id$|person.?id|record.?id|(^|_)value$|(^|_)notes?$|remarks|table_description/i;
@@ -62,5 +63,5 @@ for (const m of sql.matchAll(insertRe)) {
 }
 for (const t of schema) { const rows = data.get(t.name), columns = t.columns.map(c => c.name); counts.set(t.name, rows.length); writePages(t.name, columns, rows); }
 const result = schema.map(t => ({name:t.name,insertRows:counts.get(t.name)}));
-fs.writeFileSync('data/backup-summary.json', JSON.stringify({source:path.basename(input),generatedAt:new Date().toISOString(),backupModifiedAt:fs.statSync(input).mtime.toISOString(),tableCount:result.length,totalInsertRows:result.reduce((a,t)=>a+t.insertRows,0),tablesWithInsertRows:result.filter(t=>t.insertRows>0).length,tablesWithoutInsertRows:result.filter(t=>!t.insertRows).map(t=>t.name),tables:result},null,2)+'\n');
+fs.writeFileSync(path.join(DATA_DIR, 'backup-summary.json'), JSON.stringify({source:path.basename(input),generatedAt:new Date().toISOString(),backupModifiedAt:fs.statSync(input).mtime.toISOString(),tableCount:result.length,totalInsertRows:result.reduce((a,t)=>a+t.insertRows,0),tablesWithInsertRows:result.filter(t=>t.insertRows>0).length,tablesWithoutInsertRows:result.filter(t=>!t.insertRows).map(t=>t.name),tables:result},null,2)+'\n');
 console.log(`Filas procesadas: ${result.reduce((a,t)=>a+t.insertRows,0)} en ${result.filter(t=>t.insertRows).length} tablas; páginas JSON de ${pageSize} filas como máximo; campos sensibles redactados.`);

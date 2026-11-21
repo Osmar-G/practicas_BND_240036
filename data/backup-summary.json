@@ -1,68 +1,50 @@
 {
-  "source": "Respaldo14.sql",
-  "generatedAt": "2026-11-13T16:59:40.951Z",
-  "backupModifiedAt": "2026-11-13T16:48:52.126Z",
+  "source": "Respaldo16.sql",
+  "generatedAt": "2026-11-21T19:22:22.019Z",
+  "backupModifiedAt": "2026-11-21T19:14:06.406Z",
   "tableCount": 26,
-  "totalInsertRows": 81225,
-  "tablesWithInsertRows": 6,
+  "totalInsertRows": 81582,
+  "tablesWithInsertRows": 24,
   "tablesWithoutInsertRows": [
-    "tb_buyer_orders",
-    "tb_cancellations",
-    "tb_carts",
-    "tb_payment_methods",
-    "tb_payment_transactions",
-    "tb_payments",
-    "tb_refunds",
-    "tb_returns",
-    "tb_shipments",
-    "tb_user_addresses",
-    "tbc_payment_methods_types",
-    "tbd_address_components",
-    "tbd_cancellation_items",
-    "tbd_carts_items",
-    "tbd_order_items",
-    "tbd_products_users",
     "tbd_products_users_providers",
-    "tbd_return_items",
-    "tbd_user_payment_methods",
     "tbd_users_wishlist_products"
   ],
   "tables": [
     {
       "name": "db_users",
-      "insertRows": 7510
+      "insertRows": 7511
     },
     {
       "name": "tb_buyer_orders",
-      "insertRows": 0
+      "insertRows": 4
     },
     {
       "name": "tb_cancellations",
-      "insertRows": 0
+      "insertRows": 2
     },
     {
       "name": "tb_carts",
-      "insertRows": 0
+      "insertRows": 5
     },
     {
       "name": "tb_logs",
-      "insertRows": 40634
+      "insertRows": 40821
     },
     {
       "name": "tb_payment_methods",
-      "insertRows": 0
+      "insertRows": 4
     },
     {
       "name": "tb_payment_transactions",
-      "insertRows": 0
+      "insertRows": 25
     },
     {
       "name": "tb_payments",
-      "insertRows": 0
+      "insertRows": 9
     },
     {
       "name": "tb_people",
-      "insertRows": 7503
+      "insertRows": 7504
     },
     {
       "name": "tb_products",
@@ -70,19 +52,19 @@
     },
     {
       "name": "tb_refunds",
-      "insertRows": 0
+      "insertRows": 2
     },
     {
       "name": "tb_returns",
-      "insertRows": 0
+      "insertRows": 1
     },
     {
       "name": "tb_shipments",
-      "insertRows": 0
+      "insertRows": 4
     },
     {
       "name": "tb_user_addresses",
-      "insertRows": 0
+      "insertRows": 4
     },
     {
       "name": "tbc_categories",
@@ -90,23 +72,23 @@
     },
     {
       "name": "tbc_payment_methods_types",
-      "insertRows": 0
+      "insertRows": 4
     },
     {
       "name": "tbd_address_components",
-      "insertRows": 0
+      "insertRows": 28
     },
     {
       "name": "tbd_cancellation_items",
-      "insertRows": 0
+      "insertRows": 1
     },
     {
       "name": "tbd_carts_items",
-      "insertRows": 0
+      "insertRows": 17
     },
     {
       "name": "tbd_order_items",
-      "insertRows": 0
+      "insertRows": 17
     },
     {
       "name": "tbd_products_categories",
@@ -114,7 +96,7 @@
     },
     {
       "name": "tbd_products_users",
-      "insertRows": 0
+      "insertRows": 36
     },
     {
       "name": "tbd_products_users_providers",
@@ -122,11 +104,11 @@
     },
     {
       "name": "tbd_return_items",
-      "insertRows": 0
+      "insertRows": 1
     },
     {
       "name": "tbd_user_payment_methods",
-      "insertRows": 0
+      "insertRows": 4
     },
     {
       "name": "tbd_users_wishlist_products",

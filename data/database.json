@@ -3,7 +3,7 @@
   "databases": [
     "db_test_7b"
   ],
-  "source": "Respaldo14.sql",
+  "source": "Respaldo16.sql",
   "engine": [
     "InnoDB"
   ],
@@ -103,10 +103,10 @@
       "explanation": "La clave primaria de tbd_users_wishlist_products está formada por columnas que también son llaves foráneas hacia tb_products y db_users; esto identifica una tabla de vínculo entre ambos lados."
     }
   ],
-  "viewCount": 42,
+  "viewCount": 47,
   "procedureCount": 4,
   "functionCount": 0,
-  "triggerCount": 75,
-  "generatedAt": "2026-11-13T16:59:30.088Z",
+  "triggerCount": 72,
+  "generatedAt": "2026-11-21T19:22:20.562Z",
   "notes": []
 }
