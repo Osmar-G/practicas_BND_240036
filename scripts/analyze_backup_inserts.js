@@ -1,9 +1,10 @@
 // Count records included in mysqldump INSERT statements without copying row values.
 const fs = require('fs');
 const path = require('path');
+const { BACKUP_FILE, DATA_DIR } = require('./config');
 
-const input = process.argv[2] || 'Practica3/backups/Respaldo14.sql';
-const output = process.argv[3] || 'data/backup-summary.json';
+const input = process.argv[2] || BACKUP_FILE;
+const output = process.argv[3] || path.join(DATA_DIR, 'backup-summary.json');
 const sql = fs.readFileSync(input, 'utf8');
 const tableNames = [...sql.matchAll(/CREATE\s+TABLE\s+`([^`]+)`\s*\(/gi)].map(m => m[1]);
 const sections = [...sql.matchAll(/^-- Dumping data for table `([^`]+)`\s*$/gim)];

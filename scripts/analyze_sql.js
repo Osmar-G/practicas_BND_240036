@@ -1,8 +1,10 @@
 // Build-time MySQL dump analyzer. Produces static metadata for GitHub Pages.
 const fs = require('fs');
 const path = require('path');
-const input = process.argv[2] || 'Practica3/backups/Respaldo14.sql';
-const output = process.argv[3] || 'data';
+const { BACKUP_FILE, DATA_DIR } = require('./config');
+const input = process.argv[2] || BACKUP_FILE;
+const output = process.argv[3] || DATA_DIR;
+const sourceLabel = path.basename(input);
 const sql = fs.readFileSync(input, 'utf8');
 const db = (sql.match(/CREATE\s+DATABASE\s+(?:IF\s+NOT\s+EXISTS\s+)?`([^`]+)`/i) || [])[1] || 'Desconocida';
 const databases=[...new Set([...sql.matchAll(/CREATE\s+DATABASE\s+(?:IF\s+NOT\s+EXISTS\s+)?`([^`]+)`/gi)].map(m=>m[1]))];
@@ -64,8 +66,8 @@ for(const t of tables){const fkCols=[...new Set(t.foreignKeys.flatMap(f=>f.colum
 const tableSet=new Set(tables.map(t=>t.name));
 const unresolved=relationships.filter(r=>!tableSet.has(r.toTable));
 const indexCount=tables.reduce((sum,t)=>sum+t.indexes.length+t.uniqueKeys.length+(t.primaryKey.length?1:0),0);
-const dbMeta={name:db,databases,source:'Respaldo14.sql',engine:[...new Set(tables.map(t=>t.engine).filter(Boolean))],tableCount:tables.length,columnCount:tables.reduce((a,t)=>a+t.columns.length,0),indexCount,relationshipCount:relationships.length,primaryKeyCount:tables.reduce((n,t)=>n+t.primaryKey.length,0),primaryKeyTables:tables.filter(t=>t.primaryKey.length).length,foreignKeyCount:relationships.length,manyToMany,viewCount:views.length,procedureCount:procedures.length,functionCount:functions.length,triggerCount:triggers.length,generatedAt:new Date().toISOString(),notes:unresolved.map(r=>`La FK ${r.name} refiere a tabla no definida en el respaldo: ${r.toTable}`)};
+const dbMeta={name:db,databases,source:sourceLabel,engine:[...new Set(tables.map(t=>t.engine).filter(Boolean))],tableCount:tables.length,columnCount:tables.reduce((a,t)=>a+t.columns.length,0),indexCount,relationshipCount:relationships.length,primaryKeyCount:tables.reduce((n,t)=>n+t.primaryKey.length,0),primaryKeyTables:tables.filter(t=>t.primaryKey.length).length,foreignKeyCount:relationships.length,manyToMany,viewCount:views.length,procedureCount:procedures.length,functionCount:functions.length,triggerCount:triggers.length,generatedAt:new Date().toISOString(),notes:unresolved.map(r=>`La FK ${r.name} refiere a tabla no definida en el respaldo: ${r.toTable}`)};
 fs.mkdirSync(output,{recursive:true});
-const stats={source:'Respaldo14.sql',generatedAt:dbMeta.generatedAt,totalTables:dbMeta.tableCount,totalColumns:dbMeta.columnCount,totalRelationships:dbMeta.relationshipCount,totalPrimaryKeyColumns:dbMeta.primaryKeyCount,totalForeignKeys:dbMeta.foreignKeyCount,totalIndexes:dbMeta.indexCount,totalRows:null,tablesWithRows:null,emptyTables:null,note:'Las filas corresponden a tuplas INSERT detectadas en el respaldo.'};
+const stats={source:sourceLabel,generatedAt:dbMeta.generatedAt,totalTables:dbMeta.tableCount,totalColumns:dbMeta.columnCount,totalRelationships:dbMeta.relationshipCount,totalPrimaryKeyColumns:dbMeta.primaryKeyCount,totalForeignKeys:dbMeta.foreignKeyCount,totalIndexes:dbMeta.indexCount,totalRows:null,tablesWithRows:null,emptyTables:null,note:'Las filas corresponden a tuplas INSERT detectadas en el respaldo.'};
 for(const [file,data] of Object.entries({'database.json':dbMeta,'structure.json':{database:dbMeta,tables,relationships,manyToMany},'estadisticas.json':stats,'tables.json':tables,'relationships.json':relationships,'components.json':{views,procedures,functions,triggers,indexes:tables.flatMap(t=>t.indexes.map(i=>({...i,table:t.name}))),constraints:tables.flatMap(t=>[...(t.primaryKey.length?[{name:'PRIMARY',type:'PRIMARY KEY',table:t.name,columns:t.primaryKey,definition:t.primaryKeyDefinition}]:[]),...t.checks.map(x=>({...x,type:'CHECK',table:t.name})),...t.foreignKeys.map(f=>({...f,type:'FOREIGN KEY',table:t.name})),...t.uniqueKeys.map(k=>({...k,type:'UNIQUE',table:t.name}))])}}))fs.writeFileSync(path.join(output,file),JSON.stringify(data,null,2)+'\n');
 console.log(`Estructura extraída: ${tables.length} tablas, ${dbMeta.columnCount} columnas, ${relationships.length} FK, ${views.length} vistas, ${procedures.length} procedimientos, ${functions.length} funciones, ${triggers.length} triggers.`);
